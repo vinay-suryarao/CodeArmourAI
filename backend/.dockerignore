@@ -1,0 +1,50 @@
+# Backend Docker Ignore
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+env/
+.env
+.env.*
+*.env
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Tests (not needed in production image)
+tests/
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Logs
+logs/
+*.log
+
+# ML Data (too large)
+ml/data/raw/*
+ml/data/processed/*
+ml/data/feedback/*
+
+# Git
+.git/
+.gitignore
+
+# Docker
+Dockerfile
+.dockerignore
+
+# Documentation
+*.md
+docs/
+
+# Secrets - NEVER include
+serviceAccountKey.json
+*.pem
+*.key
+secrets/
