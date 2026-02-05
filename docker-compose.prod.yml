@@ -1,0 +1,66 @@
+# Production Docker Compose
+# Use this for deploying to production servers
+
+version: '3.8'
+
+services:
+  backend:
+    image: ghcr.io/${GITHUB_REPOSITORY:-codearmour-ai}-backend:latest
+    container_name: codearmour-backend
+    restart: always
+    ports:
+      - "8000:8000"
+    environment:
+      - ENVIRONMENT=production
+      - DEBUG=false
+      - HOST=0.0.0.0
+      - PORT=8000
+      - CORS_ORIGINS=${CORS_ORIGINS:-http://localhost}
+      - FIREBASE_PROJECT_ID=${FIREBASE_PROJECT_ID}
+      - FIREBASE_PRIVATE_KEY=${FIREBASE_PRIVATE_KEY}
+      - FIREBASE_CLIENT_EMAIL=${FIREBASE_CLIENT_EMAIL}
+      - FIREBASE_PRIVATE_KEY_ID=${FIREBASE_PRIVATE_KEY_ID}
+      - FIREBASE_CLIENT_ID=${FIREBASE_CLIENT_ID}
+      - HF_TOKEN=${HF_TOKEN}
+      - MODEL_NAME=${MODEL_NAME:-microsoft/codebert-base}
+      - PRELOAD_MODEL=true
+    volumes:
+      - model-cache:/app/.cache
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/api/v1/health/live"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 120s
+    networks:
+      - codearmour-network
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  frontend:
+    image: ghcr.io/${GITHUB_REPOSITORY:-codearmour-ai}-frontend:latest
+    container_name: codearmour-frontend
+    restart: always
+    ports:
+      - "80:80"
+      - "443:443"
+    depends_on:
+      backend:
+        condition: service_healthy
+    networks:
+      - codearmour-network
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+volumes:
+  model-cache:
+
+networks:
+  codearmour-network:
+    driver: bridge
