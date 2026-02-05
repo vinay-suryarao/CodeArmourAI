@@ -1,12 +1,13 @@
 ﻿"""Firebase Service for storing scan results and feedback"""
 
-import firebase_admin
-from firebase_admin import credentials, firestore
-from typing import Dict, List, Optional
-from datetime import datetime
 import logging
 import os
+from datetime import datetime
 from pathlib import Path
+from typing import Dict, List, Optional
+
+import firebase_admin
+from firebase_admin import credentials, firestore
 
 logger = logging.getLogger(__name__)
 
@@ -34,7 +35,9 @@ class FirebaseService:
                 logger.info("Firebase initialized successfully!")
                 return True
             else:
-                logger.warning(f"Firebase credentials file not found: {CREDENTIALS_FILE}")
+                logger.warning(
+                    f"Firebase credentials file not found: {CREDENTIALS_FILE}"
+                )
                 return False
 
         except Exception as e:
@@ -60,24 +63,32 @@ class FirebaseService:
             logger.error(f"Failed to store scan: {e}")
             return False
 
-    async def store_feedback(self, feedback_id: str, scan_id: str, vulnerability_id: str,
-                            is_false_positive: bool, user_comment: Optional[str] = None,
-                            correct_label: Optional[str] = None) -> bool:
+    async def store_feedback(
+        self,
+        feedback_id: str,
+        scan_id: str,
+        vulnerability_id: str,
+        is_false_positive: bool,
+        user_comment: Optional[str] = None,
+        correct_label: Optional[str] = None,
+    ) -> bool:
         if not self.is_connected:
             if not self.initialize():
                 return False
 
         try:
             doc_ref = self._db.collection("feedback").document(feedback_id)
-            doc_ref.set({
-                "scan_id": scan_id,
-                "vulnerability_id": vulnerability_id,
-                "is_false_positive": is_false_positive,
-                "user_comment": user_comment,
-                "correct_label": correct_label,
-                "created_at": datetime.utcnow().isoformat(),
-                "processed": False
-            })
+            doc_ref.set(
+                {
+                    "scan_id": scan_id,
+                    "vulnerability_id": vulnerability_id,
+                    "is_false_positive": is_false_positive,
+                    "user_comment": user_comment,
+                    "correct_label": correct_label,
+                    "created_at": datetime.utcnow().isoformat(),
+                    "processed": False,
+                }
+            )
             logger.info(f"Stored feedback in Firebase: {feedback_id}")
             return True
         except Exception as e:

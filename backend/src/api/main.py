@@ -1,10 +1,11 @@
 ﻿from contextlib import asynccontextmanager
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from .routes import health, detection, feedback
 from ..utils.config import settings
 from ..utils.logger import logger
+from .routes import detection, feedback, health
 
 
 @asynccontextmanager
@@ -18,7 +19,7 @@ app = FastAPI(
     title="CodeArmour AI",
     description="AI-powered SAST tool",
     version="1.0.0",
-    lifespan=lifespan
+    lifespan=lifespan,
 )
 
 app.add_middleware(

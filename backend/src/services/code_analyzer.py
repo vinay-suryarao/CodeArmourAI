@@ -1,21 +1,17 @@
 ﻿"""Code Analyzer Service - Main service for vulnerability detection"""
 
-import uuid
-import time
-from typing import Dict, List, Optional, Any
-from datetime import datetime
 import logging
+import time
+import uuid
+from datetime import datetime
+from typing import Any, Dict, List, Optional
 
+from ..models.vulnerability_detector import (PredictionResult,
+                                             VulnerabilityLabels)
 from ..schemas.request import CodeAnalysisRequest, LanguageEnum
-from ..schemas.response import (
-    CodeAnalysisResponse,
-    VulnerabilityDetail,
-    VulnerabilityLocation,
-    ScanSummary,
-    SeverityEnum,
-    VulnerabilityType
-)
-from ..models.vulnerability_detector import VulnerabilityLabels, PredictionResult
+from ..schemas.response import (CodeAnalysisResponse, ScanSummary,
+                                SeverityEnum, VulnerabilityDetail,
+                                VulnerabilityLocation, VulnerabilityType)
 from .model_service import model_service
 
 logger = logging.getLogger(__name__)
@@ -23,6 +19,7 @@ logger = logging.getLogger(__name__)
 # Try to import firebase (optional)
 try:
     from .firebase_service import firebase_service
+
     FIREBASE_AVAILABLE = True
 except ImportError:
     FIREBASE_AVAILABLE = False
@@ -104,9 +101,7 @@ class CodeAnalyzerService:
             model_service.load_model()
 
     async def analyze(
-        self,
-        request: CodeAnalysisRequest,
-        store_result: bool = True
+        self, request: CodeAnalysisRequest, store_result: bool = True
     ) -> CodeAnalysisResponse:
         start_time = time.time()
         scan_id = f"scan_{uuid.uuid4().hex[:12]}"
@@ -114,12 +109,15 @@ class CodeAnalyzerService:
 
         try:
             predictions, chunks = await model_service.predict(
-                code=request.code,
-                language=request.language.value
+                code=request.code, language=request.language.value
             )
 
-            vulnerabilities = self._build_vulnerabilities(predictions, chunks, request.code)
-            summary = self._build_summary(vulnerabilities, request.code, (time.time() - start_time) * 1000)
+            vulnerabilities = self._build_vulnerabilities(
+                predictions, chunks, request.code
+            )
+            summary = self._build_summary(
+                vulnerabilities, request.code, (time.time() - start_time) * 1000
+            )
 
             response = CodeAnalysisResponse(
                 scan_id=scan_id,
@@ -128,74 +126,92 @@ class CodeAnalyzerService:
                 language=request.language.value,
                 filename=request.filename,
                 summary=summary,
-                vulnerabilities=vulnerabilities
+                vulnerabilities=vulnerabilities,
             )
 
             # Store in Firebase if available
             if store_result and FIREBASE_AVAILABLE and firebase_service:
                 try:
-                    await firebase_service.store_scan_result(scan_id, response.model_dump())
+                    await firebase_service.store_scan_result(
+                        scan_id, response.model_dump()
+                    )
                 except Exception as e:
                     logger.warning(f"Failed to store in Firebase: {e}")
 
-            logger.info(f"Scan {scan_id} completed: {summary.total_vulnerabilities} vulnerabilities found")
+            logger.info(
+                f"Scan {scan_id} completed: {summary.total_vulnerabilities} vulnerabilities found"
+            )
             return response
 
         except Exception as e:
             logger.error(f"Scan {scan_id} failed: {e}")
             raise
 
-    def _build_vulnerabilities(self, predictions: List[PredictionResult], chunks: List, code: str) -> List[VulnerabilityDetail]:
+    def _build_vulnerabilities(
+        self, predictions: List[PredictionResult], chunks: List, code: str
+    ) -> List[VulnerabilityDetail]:
         vulnerabilities = []
-        lines = code.split('\n')
+        lines = code.split("\n")
 
         for i, pred in enumerate(predictions):
             if not pred.is_vulnerable:
                 continue
 
             vuln_type = pred.vulnerability_type
-            
+
             # Use exact line number from prediction, not from chunk
             start_line = pred.chunk_start_line
             end_line = pred.chunk_end_line
-            
+
             # Ensure valid line range
             start_line = max(1, min(start_line, len(lines)))
             end_line = max(start_line, min(end_line, len(lines)))
-            
+
             # Get the snippet - just the vulnerable line(s)
-            snippet = '\n'.join(lines[start_line - 1:end_line])
+            snippet = "\n".join(lines[start_line - 1 : end_line])
 
             location = VulnerabilityLocation(
                 start_line=start_line,
                 end_line=start_line,  # Show only the exact line where vulnerability is
-                snippet=snippet[:500]
+                snippet=snippet[:500],
             )
 
             vuln_type_enum = LABEL_TO_VULN_TYPE.get(vuln_type, VulnerabilityType.OTHER)
             severity = SEVERITY_MAPPING.get(vuln_type, SeverityEnum.MEDIUM)
 
             if pred.confidence < 0.7:
-                severity_order = [SeverityEnum.INFO, SeverityEnum.LOW, SeverityEnum.MEDIUM, SeverityEnum.HIGH, SeverityEnum.CRITICAL]
+                severity_order = [
+                    SeverityEnum.INFO,
+                    SeverityEnum.LOW,
+                    SeverityEnum.MEDIUM,
+                    SeverityEnum.HIGH,
+                    SeverityEnum.CRITICAL,
+                ]
                 current_idx = severity_order.index(severity)
                 if current_idx > 0:
                     severity = severity_order[current_idx - 1]
 
-            vulnerabilities.append(VulnerabilityDetail(
-                id=f"vuln_{uuid.uuid4().hex[:8]}",
-                type=vuln_type_enum,
-                severity=severity,
-                confidence=pred.confidence,
-                location=location,
-                description=f"Potential {vuln_type_enum.value} vulnerability detected with {pred.confidence:.1%} confidence.",
-                recommendation=RECOMMENDATIONS.get(vuln_type, "Review and fix the identified security issue."),
-                cwe_id=CWE_MAPPING.get(vuln_type),
-                owasp_category=OWASP_MAPPING.get(vuln_type)
-            ))
+            vulnerabilities.append(
+                VulnerabilityDetail(
+                    id=f"vuln_{uuid.uuid4().hex[:8]}",
+                    type=vuln_type_enum,
+                    severity=severity,
+                    confidence=pred.confidence,
+                    location=location,
+                    description=f"Potential {vuln_type_enum.value} vulnerability detected with {pred.confidence:.1%} confidence.",
+                    recommendation=RECOMMENDATIONS.get(
+                        vuln_type, "Review and fix the identified security issue."
+                    ),
+                    cwe_id=CWE_MAPPING.get(vuln_type),
+                    owasp_category=OWASP_MAPPING.get(vuln_type),
+                )
+            )
 
         return vulnerabilities
 
-    def _build_summary(self, vulnerabilities: List[VulnerabilityDetail], code: str, duration_ms: float) -> ScanSummary:
+    def _build_summary(
+        self, vulnerabilities: List[VulnerabilityDetail], code: str, duration_ms: float
+    ) -> ScanSummary:
         severity_counts = {s: 0 for s in SeverityEnum}
         for vuln in vulnerabilities:
             severity_counts[vuln.severity] += 1
@@ -207,11 +223,13 @@ class CodeAnalyzerService:
             medium_count=severity_counts[SeverityEnum.MEDIUM],
             low_count=severity_counts[SeverityEnum.LOW],
             info_count=severity_counts[SeverityEnum.INFO],
-            lines_scanned=len(code.split('\n')),
-            scan_duration_ms=duration_ms
+            lines_scanned=len(code.split("\n")),
+            scan_duration_ms=duration_ms,
         )
 
-    async def analyze_batch(self, requests: List[CodeAnalysisRequest]) -> List[CodeAnalysisResponse]:
+    async def analyze_batch(
+        self, requests: List[CodeAnalysisRequest]
+    ) -> List[CodeAnalysisResponse]:
         results = []
         for req in requests:
             result = await self.analyze(req)

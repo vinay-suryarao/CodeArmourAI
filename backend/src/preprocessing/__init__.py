@@ -1,4 +1,4 @@
-from .sliding_window import SlidingWindowChunker, CodeChunk, chunker
+from .sliding_window import CodeChunk, SlidingWindowChunker, chunker
 from .tokenizer import CodeTokenizer, TokenizedCode, code_tokenizer
 
 __all__ = [
