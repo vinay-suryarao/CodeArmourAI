@@ -1,0 +1,51 @@
+name: Deploy to Hugging Face Spaces
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'backend/**'
+      - 'ml/**'
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    name: Deploy to HF Spaces
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          lfs: true
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+
+      - name: Install Hugging Face Hub
+        run: pip install huggingface_hub
+
+      - name: Deploy to Hugging Face Spaces
+        env:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+        run: |
+          python << 'EOF'
+          import os
+          from huggingface_hub import HfApi, upload_folder
+          
+          api = HfApi()
+          
+          # Upload backend to Spaces
+          # Note: You'll need to create a Space first at huggingface.co/spaces
+          # upload_folder(
+          #     folder_path="./backend",
+          #     repo_id="your-username/codearmour-ai",
+          #     repo_type="space",
+          #     token=os.environ["HF_TOKEN"]
+          # )
+          
+          print("Deployment script ready. Configure your HF Space repo ID.")
+          EOF
