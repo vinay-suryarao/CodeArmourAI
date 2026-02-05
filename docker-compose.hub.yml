@@ -1,0 +1,63 @@
+# Docker Compose for Docker Hub Deployment
+# Replace YOUR_DOCKERHUB_USERNAME with your actual Docker Hub username
+# Usage: docker compose -f docker-compose.hub.yml up -d
+
+version: '3.8'
+
+services:
+  # Backend API Service (from Docker Hub)
+  backend:
+    image: ${DOCKER_USERNAME:-your-username}/codearmour-backend:${VERSION:-latest}
+    container_name: codearmour-backend
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    environment:
+      - ENVIRONMENT=production
+      - DEBUG=false
+      - HOST=0.0.0.0
+      - PORT=8000
+      - CORS_ORIGINS=http://localhost,http://localhost:80,http://localhost:3000
+      - FRONTEND_URL=http://localhost
+      - ALLOWED_ORIGINS=http://localhost,http://localhost:80,http://localhost:3000
+      # Firebase Config (set in .env file or pass directly)
+      - FIREBASE_PROJECT_ID=${FIREBASE_PROJECT_ID}
+      - FIREBASE_PRIVATE_KEY_ID=${FIREBASE_PRIVATE_KEY_ID}
+      - FIREBASE_PRIVATE_KEY=${FIREBASE_PRIVATE_KEY}
+      - FIREBASE_CLIENT_EMAIL=${FIREBASE_CLIENT_EMAIL}
+      - FIREBASE_CLIENT_ID=${FIREBASE_CLIENT_ID}
+      # Model Config
+      - MODEL_NAME=${MODEL_NAME:-microsoft/codebert-base}
+      - CONFIDENCE_THRESHOLD=${CONFIDENCE_THRESHOLD:-0.7}
+      - MAX_SEQ_LENGTH=${MAX_SEQ_LENGTH:-512}
+      - PRELOAD_MODEL=true
+    volumes:
+      - model-cache:/app/.cache
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/api/v1/health/live"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 120s
+    networks:
+      - codearmour-network
+
+  # Frontend Service (from Docker Hub)
+  frontend:
+    image: ${DOCKER_USERNAME:-your-username}/codearmour-frontend:${VERSION:-latest}
+    container_name: codearmour-frontend
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    depends_on:
+      backend:
+        condition: service_healthy
+    networks:
+      - codearmour-network
+
+volumes:
+  model-cache:
+
+networks:
+  codearmour-network:
+    driver: bridge
