@@ -8,7 +8,7 @@ from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 
 from firebase_admin import auth as firebase_auth
 
-from ..services.firebase_service import firebase_service
+from ...services.firebase_service import firebase_service
 
 logger = logging.getLogger(__name__)
 
