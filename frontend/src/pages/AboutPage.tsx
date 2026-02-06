@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import { Shield, Github, ExternalLink } from 'lucide-react';
+import { Shield, Lock, Sparkles, Zap } from 'lucide-react';
 
 const techStack = [
   { name: 'React', category: 'Frontend', description: 'UI library with hooks and functional components' },
@@ -121,31 +121,36 @@ export default function AboutPage() {
         </div>
       </motion.section>
 
-      {/* Open Source */}
+      {/* Why Choose Us */}
       <motion.section
         initial={{ opacity: 0 }}
         whileInView={{ opacity: 1 }}
         viewport={{ once: true }}
-        className="text-center bg-slate-100 dark:bg-dark-card rounded-2xl p-8"
+        className="text-center bg-gradient-to-br from-primary-500/10 via-purple-500/5 to-transparent dark:from-primary-900/30 dark:via-purple-900/20 dark:to-transparent rounded-2xl p-8 border border-primary-200 dark:border-primary-800"
       >
+        <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-primary-500 to-purple-500 mb-6 shadow-lg shadow-primary-500/25">
+          <Lock className="w-8 h-8 text-white" />
+        </div>
         <h2 className="text-2xl font-bold text-slate-900 dark:text-white mb-4">
-          Open Source
+          Secure & Private
         </h2>
         <p className="text-slate-600 dark:text-slate-400 mb-6 max-w-xl mx-auto">
-          CodeArmour AI is completely open source. Contribute, report issues, or fork it for your own use.
+          Your code never leaves your control. We prioritize security and privacy in everything we do.
         </p>
         
-        <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-          <a
-            href="https://github.com/vinay-suryarao/CodeArmour"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 px-6 py-3 bg-slate-900 dark:bg-white text-white dark:text-slate-900 font-medium rounded-lg hover:bg-slate-800 dark:hover:bg-slate-100 transition-colors"
-          >
-            <Github className="w-5 h-5" />
-            View on GitHub
-            <ExternalLink className="w-4 h-4" />
-          </a>
+        <div className="grid sm:grid-cols-3 gap-4 max-w-2xl mx-auto">
+          <div className="flex items-center justify-center gap-2 p-3 rounded-lg bg-white/50 dark:bg-dark-card/50">
+            <Lock className="w-4 h-4 text-green-500" />
+            <span className="text-sm font-medium text-slate-700 dark:text-slate-300">End-to-End Secure</span>
+          </div>
+          <div className="flex items-center justify-center gap-2 p-3 rounded-lg bg-white/50 dark:bg-dark-card/50">
+            <Sparkles className="w-4 h-4 text-primary-500" />
+            <span className="text-sm font-medium text-slate-700 dark:text-slate-300">AI-Powered</span>
+          </div>
+          <div className="flex items-center justify-center gap-2 p-3 rounded-lg bg-white/50 dark:bg-dark-card/50">
+            <Zap className="w-4 h-4 text-yellow-500" />
+            <span className="text-sm font-medium text-slate-700 dark:text-slate-300">Lightning Fast</span>
+          </div>
         </div>
       </motion.section>
     </div>

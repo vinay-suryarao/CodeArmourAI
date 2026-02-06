@@ -1,5 +1,5 @@
 import { Link, useLocation } from 'react-router-dom';
-import { Shield, Menu, X, Github, Moon, Sun } from 'lucide-react';
+import { Shield, Menu, X, Moon, Sun, Sparkles } from 'lucide-react';
 import { useState, useEffect } from 'react';
 
 const navLinks = [
@@ -58,6 +58,11 @@ export default function Header() {
 
           {/* Actions */}
           <div className="flex items-center gap-2">
+            <div className="hidden sm:flex items-center gap-1 px-3 py-1 rounded-full bg-gradient-to-r from-primary-500/10 to-purple-500/10 border border-primary-500/20">
+              <Sparkles className="w-3 h-3 text-primary-500" />
+              <span className="text-xs font-medium text-primary-600 dark:text-primary-400">AI Powered</span>
+            </div>
+            
             <button
               onClick={() => setIsDark(!isDark)}
               className="p-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-dark-card transition-colors"
@@ -65,16 +70,6 @@ export default function Header() {
             >
               {isDark ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
             </button>
-            
-            <a
-              href="https://github.com/vinay-suryarao/CodeArmour"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="p-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-dark-card transition-colors"
-              aria-label="GitHub"
-            >
-              <Github className="w-5 h-5" />
-            </a>
 
             {/* Mobile menu button */}
             <button

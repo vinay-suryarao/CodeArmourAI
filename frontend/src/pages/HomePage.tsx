@@ -8,7 +8,8 @@ import {
   Code, 
   AlertTriangle,
   ArrowRight,
-  Github
+  Lock,
+  Sparkles
 } from 'lucide-react';
 
 const features = [
@@ -48,8 +49,13 @@ export default function HomePage() {
     <div className="overflow-hidden">
       {/* Hero Section */}
       <section className="relative py-20 lg:py-32">
-        <div className="absolute inset-0 bg-gradient-to-b from-primary-500/5 to-transparent dark:from-primary-500/10" />
+        {/* Animated gradient background */}
+        <div className="absolute inset-0 bg-gradient-to-br from-primary-500/10 via-purple-500/5 to-transparent dark:from-primary-500/20 dark:via-purple-500/10" />
         <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGRlZnM+PHBhdHRlcm4gaWQ9ImdyaWQiIHdpZHRoPSI2MCIgaGVpZ2h0PSI2MCIgcGF0dGVyblVuaXRzPSJ1c2VyU3BhY2VPblVzZSI+PHBhdGggZD0iTSA2MCAwIEwgMCAwIDAgNjAiIGZpbGw9Im5vbmUiIHN0cm9rZT0icmdiYSgxNCwxNjUsMjMzLDAuMDUpIiBzdHJva2Utd2lkdGg9IjEiLz48L3BhdHRlcm4+PC9kZWZzPjxyZWN0IHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbGw9InVybCgjZ3JpZCkiLz48L3N2Zz4=')] opacity-50" />
+        
+        {/* Floating orbs for visual effect */}
+        <div className="absolute top-20 left-10 w-72 h-72 bg-primary-500/20 rounded-full blur-3xl animate-pulse" />
+        <div className="absolute bottom-20 right-10 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }} />
         
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
           <motion.div
@@ -58,14 +64,19 @@ export default function HomePage() {
             transition={{ duration: 0.6 }}
             className="text-center"
           >
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary-500/10 text-primary-600 dark:text-primary-400 text-sm font-medium mb-6">
-              <Shield className="w-4 h-4" />
+            <motion.div 
+              initial={{ scale: 0.9 }}
+              animate={{ scale: 1 }}
+              transition={{ duration: 0.5 }}
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-primary-500/10 to-purple-500/10 border border-primary-500/20 text-primary-600 dark:text-primary-400 text-sm font-medium mb-6 backdrop-blur-sm"
+            >
+              <Sparkles className="w-4 h-4" />
               AI-Powered Security Scanner
-            </div>
+            </motion.div>
             
-            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-slate-900 dark:text-white mb-6">
+            <h1 className="text-4xl sm:text-5xl lg:text-7xl font-bold text-slate-900 dark:text-white mb-6">
               Secure Your Code with
-              <span className="text-primary-500 block mt-2">CodeArmour AI</span>
+              <span className="bg-gradient-to-r from-primary-500 to-purple-500 bg-clip-text text-transparent block mt-2">CodeArmour AI</span>
             </h1>
             
             <p className="text-lg sm:text-xl text-slate-600 dark:text-slate-400 max-w-2xl mx-auto mb-8">
@@ -76,21 +87,20 @@ export default function HomePage() {
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
               <Link
                 to="/scanner"
-                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-8 py-3 bg-primary-500 hover:bg-primary-600 text-white font-medium rounded-lg transition-colors"
+                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-8 py-3 bg-gradient-to-r from-primary-500 to-primary-600 hover:from-primary-600 hover:to-primary-700 text-white font-medium rounded-lg transition-all shadow-lg shadow-primary-500/25 hover:shadow-primary-500/40"
               >
+                <Sparkles className="w-5 h-5" />
                 Start Scanning
                 <ArrowRight className="w-5 h-5" />
               </Link>
               
-              <a
-                href="https://github.com/vinay-suryarao/CodeArmour"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-8 py-3 bg-slate-100 dark:bg-dark-card hover:bg-slate-200 dark:hover:bg-dark-border text-slate-700 dark:text-slate-300 font-medium rounded-lg transition-colors"
+              <Link
+                to="/about"
+                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-8 py-3 bg-slate-100 dark:bg-dark-card hover:bg-slate-200 dark:hover:bg-dark-border text-slate-700 dark:text-slate-300 font-medium rounded-lg transition-colors border border-slate-200 dark:border-dark-border"
               >
-                <Github className="w-5 h-5" />
-                View on GitHub
-              </a>
+                <Lock className="w-5 h-5" />
+                Learn More
+              </Link>
             </div>
           </motion.div>
         </div>
@@ -174,23 +184,32 @@ export default function HomePage() {
       </section>
 
       {/* CTA Section */}
-      <section className="py-20 bg-primary-500">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+      <section className="py-20 bg-gradient-to-r from-primary-500 via-primary-600 to-purple-600 relative overflow-hidden">
+        {/* Decorative elements */}
+        <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGRlZnM+PHBhdHRlcm4gaWQ9ImdyaWQiIHdpZHRoPSI2MCIgaGVpZ2h0PSI2MCIgcGF0dGVyblVuaXRzPSJ1c2VyU3BhY2VPblVzZSI+PHBhdGggZD0iTSA2MCAwIEwgMCAwIDAgNjAiIGZpbGw9Im5vbmUiIHN0cm9rZT0icmdiYSgyNTUsMjU1LDI1NSwwLjEpIiBzdHJva2Utd2lkdGg9IjEiLz48L3BhdHRlcm4+PC9kZWZzPjxyZWN0IHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbGw9InVybCgjZ3JpZCkiLz48L3N2Zz4=')] opacity-30" />
+        <div className="absolute top-0 left-1/4 w-64 h-64 bg-white/10 rounded-full blur-3xl" />
+        <div className="absolute bottom-0 right-1/4 w-48 h-48 bg-purple-300/20 rounded-full blur-2xl" />
+        
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
           >
-            <h2 className="text-3xl font-bold text-white mb-4">
+            <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-white/10 backdrop-blur-sm mb-6">
+              <Shield className="w-8 h-8 text-white" />
+            </div>
+            <h2 className="text-3xl sm:text-4xl font-bold text-white mb-4">
               Ready to Secure Your Code?
             </h2>
-            <p className="text-primary-100 mb-8 max-w-xl mx-auto">
-              Start scanning your code for vulnerabilities today. It's free and open source.
+            <p className="text-primary-100 mb-8 max-w-xl mx-auto text-lg">
+              Start scanning your code for vulnerabilities today. Fast, accurate, and secure.
             </p>
             <Link
               to="/scanner"
-              className="inline-flex items-center gap-2 px-8 py-3 bg-white text-primary-600 font-medium rounded-lg hover:bg-primary-50 transition-colors"
+              className="inline-flex items-center gap-2 px-8 py-4 bg-white text-primary-600 font-semibold rounded-xl hover:bg-primary-50 transition-all shadow-xl hover:shadow-2xl hover:scale-105"
             >
+              <Sparkles className="w-5 h-5" />
               Try the Scanner
               <ArrowRight className="w-5 h-5" />
             </Link>
