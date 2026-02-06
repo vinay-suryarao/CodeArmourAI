@@ -4,13 +4,14 @@ Main endpoints for vulnerability detection
 """
 
 import logging
-from typing import List
+from typing import List, Optional
 
-from fastapi import APIRouter, BackgroundTasks, HTTPException
+from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException
 
 from ...schemas.request import BatchAnalysisRequest, CodeAnalysisRequest
 from ...schemas.response import CodeAnalysisResponse, ErrorResponse
 from ...services.code_analyzer import code_analyzer
+from ..middleware.auth import get_current_user
 
 logger = logging.getLogger(__name__)
 
@@ -25,7 +26,10 @@ router = APIRouter(prefix="/detect", tags=["Detection"])
         500: {"model": ErrorResponse, "description": "Internal server error"},
     },
 )
-async def analyze_code(request: CodeAnalysisRequest):
+async def analyze_code(
+    request: CodeAnalysisRequest,
+    user: Optional[dict] = Depends(get_current_user),
+):
     """
     Analyze source code for security vulnerabilities.
 
@@ -53,7 +57,9 @@ async def analyze_code(request: CodeAnalysisRequest):
         - CWE and OWASP references
     """
     try:
-        result = await code_analyzer.analyze(request)
+        # Pass user_uid to analyzer so scan is stored per-user
+        user_uid = user["uid"] if user else None
+        result = await code_analyzer.analyze(request, user_uid=user_uid)
         return result
 
     except ValueError as e:

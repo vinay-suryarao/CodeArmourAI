@@ -5,7 +5,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from ..utils.config import settings
 from ..utils.logger import logger
-from .routes import detection, feedback, health
+from .routes import detection, feedback, health, history
 
 
 @asynccontextmanager
@@ -33,6 +33,7 @@ app.add_middleware(
 app.include_router(health.router, prefix="/api/v1")
 app.include_router(detection.router, prefix="/api/v1")
 app.include_router(feedback.router, prefix="/api/v1")
+app.include_router(history.router, prefix="/api/v1")
 
 
 @app.get("/")

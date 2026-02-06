@@ -101,7 +101,7 @@ class CodeAnalyzerService:
             model_service.load_model()
 
     async def analyze(
-        self, request: CodeAnalysisRequest, store_result: bool = True
+        self, request: CodeAnalysisRequest, store_result: bool = True, user_uid: str = None
     ) -> CodeAnalysisResponse:
         start_time = time.time()
         scan_id = f"scan_{uuid.uuid4().hex[:12]}"
@@ -133,7 +133,7 @@ class CodeAnalyzerService:
             if store_result and FIREBASE_AVAILABLE and firebase_service:
                 try:
                     await firebase_service.store_scan_result(
-                        scan_id, response.model_dump()
+                        scan_id, response.model_dump(), user_uid=user_uid
                     )
                 except Exception as e:
                     logger.warning(f"Failed to store in Firebase: {e}")

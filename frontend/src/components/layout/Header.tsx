@@ -1,6 +1,8 @@
-import { Link, useLocation } from 'react-router-dom';
-import { Shield, Menu, X, Moon, Sun, Sparkles } from 'lucide-react';
-import { useState, useEffect } from 'react';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { Shield, Menu, X, Moon, Sun, Sparkles, LogIn, LogOut, User } from 'lucide-react';
+import { useState, useEffect, useRef } from 'react';
+import { useAuth } from '../../contexts/AuthContext';
+import toast from 'react-hot-toast';
 
 const navLinks = [
   { to: '/', label: 'Home' },
@@ -11,17 +13,42 @@ const navLinks = [
 
 export default function Header() {
   const location = useLocation();
+  const navigate = useNavigate();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isDark, setIsDark] = useState(true);
+  const [showUserMenu, setShowUserMenu] = useState(false);
+  const userMenuRef = useRef<HTMLDivElement>(null);
+  const { currentUser, logout } = useAuth();
 
   useEffect(() => {
-    // Check for dark mode preference
     if (isDark) {
       document.documentElement.classList.add('dark');
     } else {
       document.documentElement.classList.remove('dark');
     }
   }, [isDark]);
+
+  // Close user menu on click outside
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (userMenuRef.current && !userMenuRef.current.contains(event.target as Node)) {
+        setShowUserMenu(false);
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  const handleLogout = async () => {
+    try {
+      await logout();
+      setShowUserMenu(false);
+      toast.success('Logged out successfully');
+      navigate('/');
+    } catch {
+      toast.error('Failed to logout');
+    }
+  };
 
   return (
     <header className="sticky top-0 z-50 bg-white/80 dark:bg-dark-bg/80 backdrop-blur-lg border-b border-slate-200 dark:border-dark-border">
@@ -71,6 +98,61 @@ export default function Header() {
               {isDark ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
             </button>
 
+            {/* Auth Buttons */}
+            {currentUser ? (
+              <div className="relative" ref={userMenuRef}>
+                <button
+                  onClick={() => setShowUserMenu(!showUserMenu)}
+                  className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-primary-500/10 hover:bg-primary-500/20 transition-colors"
+                >
+                  <div className="w-7 h-7 rounded-full bg-gradient-to-br from-primary-500 to-purple-500 flex items-center justify-center text-white text-xs font-bold">
+                    {currentUser.displayName?.charAt(0).toUpperCase() || currentUser.email?.charAt(0).toUpperCase()}
+                  </div>
+                  <span className="hidden sm:block text-sm font-medium text-slate-700 dark:text-slate-300 max-w-[100px] truncate">
+                    {currentUser.displayName || 'User'}
+                  </span>
+                </button>
+
+                {/* Dropdown */}
+                {showUserMenu && (
+                  <div className="absolute right-0 mt-2 w-56 bg-white dark:bg-dark-card rounded-xl border border-slate-200 dark:border-dark-border shadow-xl py-2 animate-fade-in z-50">
+                    <div className="px-4 py-2 border-b border-slate-200 dark:border-dark-border">
+                      <p className="text-sm font-medium text-slate-900 dark:text-white truncate">
+                        {currentUser.displayName}
+                      </p>
+                      <p className="text-xs text-slate-500 dark:text-slate-400 truncate">
+                        {currentUser.email}
+                      </p>
+                    </div>
+                    <button
+                      onClick={handleLogout}
+                      className="w-full flex items-center gap-2 px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
+                    >
+                      <LogOut className="w-4 h-4" />
+                      Sign out
+                    </button>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <div className="flex items-center gap-2">
+                <Link
+                  to="/login"
+                  className="hidden sm:inline-flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-dark-card rounded-lg transition-colors"
+                >
+                  <LogIn className="w-4 h-4" />
+                  Sign In
+                </Link>
+                <Link
+                  to="/register"
+                  className="inline-flex items-center gap-1.5 px-4 py-2 text-sm font-medium bg-gradient-to-r from-primary-500 to-primary-600 text-white rounded-lg hover:from-primary-600 hover:to-primary-700 transition-all shadow-sm"
+                >
+                  <User className="w-4 h-4" />
+                  Sign Up
+                </Link>
+              </div>
+            )}
+
             {/* Mobile menu button */}
             <button
               onClick={() => setIsMenuOpen(!isMenuOpen)}
@@ -99,6 +181,36 @@ export default function Header() {
                 {link.label}
               </Link>
             ))}
+            
+            {/* Mobile auth links */}
+            <div className="border-t border-slate-200 dark:border-dark-border mt-2 pt-2">
+              {currentUser ? (
+                <button
+                  onClick={() => { setIsMenuOpen(false); handleLogout(); }}
+                  className="w-full flex items-center gap-2 px-4 py-2 text-sm font-medium text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
+                >
+                  <LogOut className="w-4 h-4" />
+                  Sign out
+                </button>
+              ) : (
+                <>
+                  <Link
+                    to="/login"
+                    onClick={() => setIsMenuOpen(false)}
+                    className="block px-4 py-2 rounded-lg text-sm font-medium text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-dark-card"
+                  >
+                    Sign In
+                  </Link>
+                  <Link
+                    to="/register"
+                    onClick={() => setIsMenuOpen(false)}
+                    className="block px-4 py-2 rounded-lg text-sm font-medium text-primary-600 dark:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/20"
+                  >
+                    Create Account
+                  </Link>
+                </>
+              )}
+            </div>
           </nav>
         )}
       </div>

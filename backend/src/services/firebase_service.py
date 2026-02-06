@@ -91,16 +91,31 @@ class FirebaseService:
     def is_connected(self) -> bool:
         return self._initialized and self._db is not None
 
-    async def store_scan_result(self, scan_id: str, result: Dict) -> bool:
+    async def store_scan_result(self, scan_id: str, result: Dict, user_uid: str = None) -> bool:
         if not self.is_connected:
             if not self.initialize():
                 return False
 
         try:
+            # Store in global scans collection
             doc_ref = self._db.collection("scans").document(scan_id)
             result["created_at"] = datetime.utcnow().isoformat()
+            if user_uid:
+                result["user_uid"] = user_uid
             doc_ref.set(result)
             logger.info(f"Stored scan in Firebase: {scan_id}")
+
+            # Also store in user-specific collection if user is authenticated
+            if user_uid:
+                user_scan_ref = (
+                    self._db.collection("user_scans")
+                    .document(user_uid)
+                    .collection("scans")
+                    .document(scan_id)
+                )
+                user_scan_ref.set(result)
+                logger.info(f"Stored user scan for user {user_uid}: {scan_id}")
+
             return True
         except Exception as e:
             logger.error(f"Failed to store scan: {e}")
