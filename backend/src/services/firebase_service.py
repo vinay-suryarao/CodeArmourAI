@@ -16,6 +16,37 @@ BACKEND_DIR = Path(__file__).resolve().parent.parent.parent
 CREDENTIALS_FILE = BACKEND_DIR / "serviceAccountKey.json"
 
 
+def get_credentials_from_env() -> Optional[Dict]:
+    """Build Firebase credentials dict from environment variables"""
+    project_id = os.getenv("FIREBASE_PROJECT_ID")
+    private_key = os.getenv("FIREBASE_PRIVATE_KEY")
+    client_email = os.getenv("FIREBASE_CLIENT_EMAIL")
+
+    if not all([project_id, private_key, client_email]):
+        return None
+
+    # Handle escaped newlines in private key
+    if private_key:
+        private_key = private_key.replace("\\n", "\n")
+
+    return {
+        "type": "service_account",
+        "project_id": project_id,
+        "private_key_id": os.getenv("FIREBASE_PRIVATE_KEY_ID", ""),
+        "private_key": private_key,
+        "client_email": client_email,
+        "client_id": os.getenv("FIREBASE_CLIENT_ID", ""),
+        "auth_uri": os.getenv(
+            "FIREBASE_AUTH_URI", "https://accounts.google.com/o/oauth2/auth"
+        ),
+        "token_uri": os.getenv(
+            "FIREBASE_TOKEN_URI", "https://oauth2.googleapis.com/token"
+        ),
+        "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+        "client_x509_cert_url": f"https://www.googleapis.com/robot/v1/metadata/x509/{client_email.replace('@', '%40')}",
+    }
+
+
 class FirebaseService:
     def __init__(self):
         self._db = None
@@ -26,19 +57,31 @@ class FirebaseService:
             return True
 
         try:
+            # First try JSON file (local development)
             if CREDENTIALS_FILE.exists():
                 logger.info(f"Loading Firebase credentials from: {CREDENTIALS_FILE}")
                 cred = credentials.Certificate(str(CREDENTIALS_FILE))
                 firebase_admin.initialize_app(cred)
                 self._db = firestore.client()
                 self._initialized = True
-                logger.info("Firebase initialized successfully!")
+                logger.info("Firebase initialized from JSON file!")
                 return True
-            else:
-                logger.warning(
-                    f"Firebase credentials file not found: {CREDENTIALS_FILE}"
-                )
-                return False
+
+            # Then try environment variables (production/Render)
+            env_creds = get_credentials_from_env()
+            if env_creds:
+                logger.info("Loading Firebase credentials from environment variables")
+                cred = credentials.Certificate(env_creds)
+                firebase_admin.initialize_app(cred)
+                self._db = firestore.client()
+                self._initialized = True
+                logger.info("Firebase initialized from environment variables!")
+                return True
+
+            logger.warning(
+                "Firebase credentials not found (no JSON file or env vars)"
+            )
+            return False
 
         except Exception as e:
             logger.error(f"Firebase initialization failed: {e}")
