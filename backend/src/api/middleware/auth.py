@@ -6,11 +6,20 @@ from typing import Optional
 from fastapi import Depends, HTTPException, Request, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 
-from firebase_admin import auth as firebase_auth
-
-from ...services.firebase_service import firebase_service
-
 logger = logging.getLogger(__name__)
+
+try:
+    from firebase_admin import auth as firebase_auth
+    from ...services.firebase_service import firebase_service
+
+    FIREBASE_AUTH_AVAILABLE = True
+    FIREBASE_IMPORT_ERROR = None
+except Exception as exc:
+    firebase_auth = None
+    firebase_service = None
+    FIREBASE_AUTH_AVAILABLE = False
+    FIREBASE_IMPORT_ERROR = exc
+    logger.warning("Firebase auth is unavailable: %s", FIREBASE_IMPORT_ERROR)
 
 security = HTTPBearer(auto_error=False)
 
@@ -26,6 +35,12 @@ async def get_current_user(
     if not credentials:
         return None
 
+    if not FIREBASE_AUTH_AVAILABLE or firebase_service is None:
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="Authentication service unavailable",
+        )
+
     token = credentials.credentials
 
     try:
@@ -39,17 +54,17 @@ async def get_current_user(
             "email": decoded_token.get("email"),
             "name": decoded_token.get("name"),
         }
-    except firebase_auth.ExpiredIdTokenError:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Token has expired",
-        )
-    except firebase_auth.InvalidIdTokenError:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Invalid token",
-        )
     except Exception as e:
+        if isinstance(e, firebase_auth.ExpiredIdTokenError):
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Token has expired",
+            )
+        if isinstance(e, firebase_auth.InvalidIdTokenError):
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Invalid token",
+            )
         logger.error(f"Token verification failed: {e}")
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,

@@ -8,10 +8,17 @@ from typing import List, Optional
 
 from fastapi import APIRouter, Depends, HTTPException
 
-from ...services.firebase_service import firebase_service
 from ..middleware.auth import require_auth
 
 logger = logging.getLogger(__name__)
+
+try:
+    from ...services.firebase_service import firebase_service
+
+    FIREBASE_AVAILABLE = True
+except ImportError:
+    FIREBASE_AVAILABLE = False
+    firebase_service = None
 
 router = APIRouter(prefix="/history", tags=["History"])
 
@@ -19,6 +26,9 @@ router = APIRouter(prefix="/history", tags=["History"])
 @router.get("")
 async def get_user_history(user: dict = Depends(require_auth)):
     """Get scan history for the authenticated user"""
+    if not FIREBASE_AVAILABLE or firebase_service is None:
+        raise HTTPException(status_code=503, detail="Database not available")
+
     if not firebase_service.is_connected:
         if not firebase_service.initialize():
             raise HTTPException(status_code=503, detail="Database not available")
@@ -48,6 +58,9 @@ async def get_user_history(user: dict = Depends(require_auth)):
 @router.delete("")
 async def clear_user_history(user: dict = Depends(require_auth)):
     """Clear all scan history for the authenticated user"""
+    if not FIREBASE_AVAILABLE or firebase_service is None:
+        raise HTTPException(status_code=503, detail="Database not available")
+
     if not firebase_service.is_connected:
         if not firebase_service.initialize():
             raise HTTPException(status_code=503, detail="Database not available")
@@ -84,6 +97,9 @@ async def clear_user_history(user: dict = Depends(require_auth)):
 @router.delete("/{scan_id}")
 async def delete_scan(scan_id: str, user: dict = Depends(require_auth)):
     """Delete a specific scan from history"""
+    if not FIREBASE_AVAILABLE or firebase_service is None:
+        raise HTTPException(status_code=503, detail="Database not available")
+
     if not firebase_service.is_connected:
         if not firebase_service.initialize():
             raise HTTPException(status_code=503, detail="Database not available")

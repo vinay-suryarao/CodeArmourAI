@@ -32,6 +32,10 @@ export default function LoginPage() {
         message = 'Too many attempts. Try again later';
       } else if (error.code === 'auth/invalid-credential') {
         message = 'Invalid email or password';
+      } else if (error.code === 'auth/invalid-api-key') {
+        message = 'Firebase API key invalid hai. frontend/.env me real Firebase config set karo';
+      } else if (typeof error?.message === 'string' && error.message.includes('Firebase is not configured')) {
+        message = error.message;
       }
       toast.error(message);
     } finally {
