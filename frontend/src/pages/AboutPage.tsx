@@ -1,20 +1,92 @@
 import { motion } from 'framer-motion';
 import { Shield, Lock, Sparkles, Zap } from 'lucide-react';
-
-const techStack = [
-  { name: 'React', category: 'Frontend', description: 'UI library with hooks and functional components' },
-  { name: 'Tailwind CSS', category: 'Frontend', description: 'Utility-first CSS framework' },
-  { name: 'Monaco Editor', category: 'Frontend', description: 'VS Code editor engine for code editing' },
-  { name: 'FastAPI', category: 'Backend', description: 'High-performance Python web framework' },
-  { name: 'CodeBERT', category: 'ML', description: 'Pre-trained model for programming languages' },
-  { name: 'PyTorch', category: 'ML', description: 'Deep learning framework' },
-  { name: 'Firebase', category: 'Database', description: 'Cloud Firestore for storing feedback' },
-  { name: 'MLflow', category: 'MLOps', description: 'Experiment tracking and model management' },
-  { name: 'Docker', category: 'DevOps', description: 'Containerization for deployment' },
-  { name: 'GitHub Actions', category: 'CI/CD', description: 'Automated testing and deployment' },
-];
+import { useLanguage } from '../contexts/LanguageContext';
 
 export default function AboutPage() {
+  const { t, language } = useLanguage();
+
+  const steps = [
+    {
+      step: '1',
+      title: t('about_step1_title'),
+      description: t('about_step1_desc'),
+    },
+    {
+      step: '2',
+      title: t('about_step2_title'),
+      description: t('about_step2_desc'),
+    },
+    {
+      step: '3',
+      title: t('about_step3_title'),
+      description: t('about_step3_desc'),
+    },
+  ];
+
+  const techStack = [
+    {
+      name: 'React',
+      category: language === 'hi' ? 'फ्रंटएंड' : 'Frontend',
+      description:
+        language === 'hi'
+          ? 'hooks और functional components के साथ UI लाइब्रेरी'
+          : 'UI library with hooks and functional components',
+    },
+    {
+      name: 'Tailwind CSS',
+      category: language === 'hi' ? 'फ्रंटएंड' : 'Frontend',
+      description: language === 'hi' ? 'utility-first CSS फ्रेमवर्क' : 'Utility-first CSS framework',
+    },
+    {
+      name: 'Monaco Editor',
+      category: language === 'hi' ? 'फ्रंटएंड' : 'Frontend',
+      description:
+        language === 'hi'
+          ? 'कोड एडिटिंग के लिए VS Code एडिटर इंजन'
+          : 'VS Code editor engine for code editing',
+    },
+    {
+      name: 'FastAPI',
+      category: language === 'hi' ? 'बैकएंड' : 'Backend',
+      description: language === 'hi' ? 'हाई-परफॉर्मेंस Python वेब फ्रेमवर्क' : 'High-performance Python web framework',
+    },
+    {
+      name: 'CodeBERT',
+      category: 'ML',
+      description:
+        language === 'hi'
+          ? 'प्रोग्रामिंग भाषाओं के लिए pre-trained मॉडल'
+          : 'Pre-trained model for programming languages',
+    },
+    {
+      name: 'PyTorch',
+      category: 'ML',
+      description: language === 'hi' ? 'डीप लर्निंग फ्रेमवर्क' : 'Deep learning framework',
+    },
+    {
+      name: 'Firebase',
+      category: language === 'hi' ? 'डेटाबेस' : 'Database',
+      description:
+        language === 'hi' ? 'फीडबैक स्टोर करने के लिए Cloud Firestore' : 'Cloud Firestore for storing feedback',
+    },
+    {
+      name: 'MLflow',
+      category: 'MLOps',
+      description:
+        language === 'hi' ? 'experiment tracking और model management' : 'Experiment tracking and model management',
+    },
+    {
+      name: 'Docker',
+      category: language === 'hi' ? 'डेवऑप्स' : 'DevOps',
+      description: language === 'hi' ? 'deployment के लिए containerization' : 'Containerization for deployment',
+    },
+    {
+      name: 'GitHub Actions',
+      category: 'CI/CD',
+      description: language === 'hi' ? 'automated testing और deployment' : 'Automated testing and deployment',
+    },
+  ];
+
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
       {/* Hero */}
@@ -27,11 +99,10 @@ export default function AboutPage() {
           <Shield className="w-10 h-10 text-primary-500" />
         </div>
         <h1 className="text-4xl font-bold text-slate-900 dark:text-white mb-4">
-          About CodeArmour AI
+          {t('about_title')}
         </h1>
         <p className="text-lg text-slate-600 dark:text-slate-400 max-w-2xl mx-auto">
-          An AI-powered Static Application Security Testing (SAST) tool designed to detect 
-          security vulnerabilities in source code using deep learning.
+          {t('about_subtitle')}
         </p>
       </motion.div>
 
@@ -43,27 +114,11 @@ export default function AboutPage() {
         className="mb-16"
       >
         <h2 className="text-2xl font-bold text-slate-900 dark:text-white mb-6 text-center">
-          How It Works
+          {t('about_how_title')}
         </h2>
         
         <div className="grid md:grid-cols-3 gap-6">
-          {[
-            {
-              step: '1',
-              title: 'Input Code',
-              description: 'Paste your code or upload a file. We support multiple programming languages.',
-            },
-            {
-              step: '2',
-              title: 'AI Analysis',
-              description: 'Our CodeBERT model analyzes code semantics to detect vulnerability patterns.',
-            },
-            {
-              step: '3',
-              title: 'Get Results',
-              description: 'Receive detailed vulnerability reports with severity levels and fix recommendations.',
-            },
-          ].map((item, index) => (
+          {steps.map((item, index) => (
             <motion.div
               key={item.step}
               initial={{ opacity: 0, y: 20 }}
@@ -94,7 +149,7 @@ export default function AboutPage() {
         className="mb-16"
       >
         <h2 className="text-2xl font-bold text-slate-900 dark:text-white mb-6 text-center">
-          Technology Stack
+          {t('about_stack_title')}
         </h2>
         
         <div className="grid sm:grid-cols-2 lg:grid-cols-5 gap-3">
@@ -132,24 +187,24 @@ export default function AboutPage() {
           <Lock className="w-8 h-8 text-white" />
         </div>
         <h2 className="text-2xl font-bold text-slate-900 dark:text-white mb-4">
-          Secure & Private
+          {t('about_secure_title')}
         </h2>
         <p className="text-slate-600 dark:text-slate-400 mb-6 max-w-xl mx-auto">
-          Your code never leaves your control. We prioritize security and privacy in everything we do.
+          {t('about_secure_desc')}
         </p>
         
         <div className="grid sm:grid-cols-3 gap-4 max-w-2xl mx-auto">
           <div className="flex items-center justify-center gap-2 p-3 rounded-lg bg-white/50 dark:bg-dark-card/50">
             <Lock className="w-4 h-4 text-green-500" />
-            <span className="text-sm font-medium text-slate-700 dark:text-slate-300">End-to-End Secure</span>
+            <span className="text-sm font-medium text-slate-700 dark:text-slate-300">{t('about_secure_e2e')}</span>
           </div>
           <div className="flex items-center justify-center gap-2 p-3 rounded-lg bg-white/50 dark:bg-dark-card/50">
             <Sparkles className="w-4 h-4 text-primary-500" />
-            <span className="text-sm font-medium text-slate-700 dark:text-slate-300">AI-Powered</span>
+            <span className="text-sm font-medium text-slate-700 dark:text-slate-300">{t('about_secure_ai')}</span>
           </div>
           <div className="flex items-center justify-center gap-2 p-3 rounded-lg bg-white/50 dark:bg-dark-card/50">
             <Zap className="w-4 h-4 text-yellow-500" />
-            <span className="text-sm font-medium text-slate-700 dark:text-slate-300">Lightning Fast</span>
+            <span className="text-sm font-medium text-slate-700 dark:text-slate-300">{t('about_secure_fast')}</span>
           </div>
         </div>
       </motion.section>

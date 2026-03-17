@@ -11,29 +11,8 @@ import {
   Lock,
   Sparkles
 } from 'lucide-react';
-
-const features = [
-  {
-    icon: Brain,
-    title: 'AI-Powered Detection',
-    description: 'Uses CodeBERT deep learning model to understand code semantics and detect vulnerabilities with high accuracy.',
-  },
-  {
-    icon: Zap,
-    title: 'Real-time Analysis',
-    description: 'Get instant feedback on your code security. Analyze snippets or entire files in seconds.',
-  },
-  {
-    icon: RefreshCw,
-    title: 'Continuous Learning',
-    description: 'Your feedback helps improve the model. Our MLOps pipeline continuously refines detection accuracy.',
-  },
-  {
-    icon: Code,
-    title: 'Multi-Language Support',
-    description: 'Supports Python, JavaScript, Java, C/C++, and more. One tool for all your codebases.',
-  },
-];
+import { useLanguage } from '../contexts/LanguageContext';
+import { localizeVulnerabilityType } from '../utils/localization';
 
 const vulnerabilityTypes = [
   'SQL Injection',
@@ -45,6 +24,31 @@ const vulnerabilityTypes = [
 ];
 
 export default function HomePage() {
+  const { t, language } = useLanguage();
+
+  const features = [
+    {
+      icon: Brain,
+      title: t('feature_ai_title'),
+      description: t('feature_ai_desc'),
+    },
+    {
+      icon: Zap,
+      title: t('feature_realtime_title'),
+      description: t('feature_realtime_desc'),
+    },
+    {
+      icon: RefreshCw,
+      title: t('feature_learning_title'),
+      description: t('feature_learning_desc'),
+    },
+    {
+      icon: Code,
+      title: t('feature_multilang_title'),
+      description: t('feature_multilang_desc'),
+    },
+  ];
+
   return (
     <div className="overflow-hidden">
       {/* Hero Section */}
@@ -71,17 +75,16 @@ export default function HomePage() {
               className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-primary-500/10 to-purple-500/10 border border-primary-500/20 text-primary-600 dark:text-primary-400 text-sm font-medium mb-6 backdrop-blur-sm"
             >
               <Sparkles className="w-4 h-4" />
-              AI-Powered Security Scanner
+              {t('home_badge')}
             </motion.div>
             
             <h1 className="text-4xl sm:text-5xl lg:text-7xl font-bold text-slate-900 dark:text-white mb-6">
-              Secure Your Code with
+              {t('home_title_prefix')}
               <span className="bg-gradient-to-r from-primary-500 to-purple-500 bg-clip-text text-transparent block mt-2">CodeArmour AI</span>
             </h1>
             
             <p className="text-lg sm:text-xl text-slate-600 dark:text-slate-400 max-w-2xl mx-auto mb-8">
-              Detect security vulnerabilities in your source code using advanced deep learning.
-              Fast, accurate, and continuously improving.
+              {t('home_subtitle')}
             </p>
             
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
@@ -90,7 +93,7 @@ export default function HomePage() {
                 className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-8 py-3 bg-gradient-to-r from-primary-500 to-primary-600 hover:from-primary-600 hover:to-primary-700 text-white font-medium rounded-lg transition-all shadow-lg shadow-primary-500/25 hover:shadow-primary-500/40"
               >
                 <Sparkles className="w-5 h-5" />
-                Start Scanning
+                {t('home_start_scanning')}
                 <ArrowRight className="w-5 h-5" />
               </Link>
               
@@ -99,7 +102,7 @@ export default function HomePage() {
                 className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-8 py-3 bg-slate-100 dark:bg-dark-card hover:bg-slate-200 dark:hover:bg-dark-border text-slate-700 dark:text-slate-300 font-medium rounded-lg transition-colors border border-slate-200 dark:border-dark-border"
               >
                 <Lock className="w-5 h-5" />
-                Learn More
+                {t('home_learn_more')}
               </Link>
             </div>
           </motion.div>
@@ -116,10 +119,10 @@ export default function HomePage() {
             className="text-center mb-12"
           >
             <h2 className="text-3xl font-bold text-slate-900 dark:text-white mb-4">
-              Why CodeArmour AI?
+              {t('home_why_title')}
             </h2>
             <p className="text-slate-600 dark:text-slate-400 max-w-2xl mx-auto">
-              Built with cutting-edge technology to keep your applications secure
+              {t('home_why_subtitle')}
             </p>
           </motion.div>
 
@@ -158,10 +161,10 @@ export default function HomePage() {
             className="text-center mb-12"
           >
             <h2 className="text-3xl font-bold text-slate-900 dark:text-white mb-4">
-              Vulnerabilities We Detect
+              {t('home_detect_title')}
             </h2>
             <p className="text-slate-600 dark:text-slate-400 max-w-2xl mx-auto">
-              Our AI model is trained to identify the most common and dangerous security issues
+              {t('home_detect_subtitle')}
             </p>
           </motion.div>
 
@@ -176,7 +179,7 @@ export default function HomePage() {
                 className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300 text-sm font-medium"
               >
                 <AlertTriangle className="w-4 h-4" />
-                {vuln}
+                {localizeVulnerabilityType(vuln, language)}
               </motion.div>
             ))}
           </div>
@@ -200,17 +203,17 @@ export default function HomePage() {
               <Shield className="w-8 h-8 text-white" />
             </div>
             <h2 className="text-3xl sm:text-4xl font-bold text-white mb-4">
-              Ready to Secure Your Code?
+              {t('home_cta_title')}
             </h2>
             <p className="text-primary-100 mb-8 max-w-xl mx-auto text-lg">
-              Start scanning your code for vulnerabilities today. Fast, accurate, and secure.
+              {t('home_cta_subtitle')}
             </p>
             <Link
               to="/scanner"
               className="inline-flex items-center gap-2 px-8 py-4 bg-white text-primary-600 font-semibold rounded-xl hover:bg-primary-50 transition-all shadow-xl hover:shadow-2xl hover:scale-105"
             >
               <Sparkles className="w-5 h-5" />
-              Try the Scanner
+              {t('home_try_scanner')}
               <ArrowRight className="w-5 h-5" />
             </Link>
           </motion.div>

@@ -2,13 +2,14 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Shield, Menu, X, Moon, Sun, Sparkles, LogIn, LogOut, User } from 'lucide-react';
 import { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
+import { useLanguage } from '../../contexts/LanguageContext';
 import toast from 'react-hot-toast';
 
 const navLinks = [
-  { to: '/', label: 'Home' },
-  { to: '/scanner', label: 'Scanner' },
-  { to: '/history', label: 'History' },
-  { to: '/about', label: 'About' },
+  { to: '/', labelKey: 'nav_home' },
+  { to: '/scanner', labelKey: 'nav_scanner' },
+  { to: '/history', labelKey: 'nav_history' },
+  { to: '/about', labelKey: 'nav_about' },
 ];
 
 export default function Header() {
@@ -19,6 +20,7 @@ export default function Header() {
   const [showUserMenu, setShowUserMenu] = useState(false);
   const userMenuRef = useRef<HTMLDivElement>(null);
   const { currentUser, logout } = useAuth();
+  const { language, setLanguage, t } = useLanguage();
 
   useEffect(() => {
     if (isDark) {
@@ -78,7 +80,7 @@ export default function Header() {
                     : 'text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-dark-card'
                 }`}
               >
-                {link.label}
+                {t(link.labelKey)}
               </Link>
             ))}
           </nav>
@@ -97,6 +99,29 @@ export default function Header() {
             >
               {isDark ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
             </button>
+
+            <div className="flex items-center rounded-lg border border-slate-300 dark:border-dark-border overflow-hidden text-xs font-semibold">
+              <button
+                onClick={() => setLanguage('en')}
+                className={`px-2 py-1 transition-colors ${
+                  language === 'en'
+                    ? 'bg-primary-500 text-white'
+                    : 'bg-white dark:bg-dark-card text-slate-600 dark:text-slate-300'
+                }`}
+              >
+                {t('lang_english')}
+              </button>
+              <button
+                onClick={() => setLanguage('hi')}
+                className={`px-2 py-1 transition-colors ${
+                  language === 'hi'
+                    ? 'bg-primary-500 text-white'
+                    : 'bg-white dark:bg-dark-card text-slate-600 dark:text-slate-300'
+                }`}
+              >
+                {t('lang_hindi')}
+              </button>
+            </div>
 
             {/* Auth Buttons */}
             {currentUser ? (
@@ -129,7 +154,7 @@ export default function Header() {
                       className="w-full flex items-center gap-2 px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
                     >
                       <LogOut className="w-4 h-4" />
-                      Sign out
+                      {language === 'hi' ? 'साइन आउट' : 'Sign out'}
                     </button>
                   </div>
                 )}
@@ -141,14 +166,14 @@ export default function Header() {
                   className="hidden sm:inline-flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-dark-card rounded-lg transition-colors"
                 >
                   <LogIn className="w-4 h-4" />
-                  Sign In
+                  {language === 'hi' ? 'साइन इन' : 'Sign In'}
                 </Link>
                 <Link
                   to="/register"
                   className="inline-flex items-center gap-1.5 px-4 py-2 text-sm font-medium bg-gradient-to-r from-primary-500 to-primary-600 text-white rounded-lg hover:from-primary-600 hover:to-primary-700 transition-all shadow-sm"
                 >
                   <User className="w-4 h-4" />
-                  Sign Up
+                  {language === 'hi' ? 'साइन अप' : 'Sign Up'}
                 </Link>
               </div>
             )}
@@ -178,7 +203,7 @@ export default function Header() {
                     : 'text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-dark-card'
                 }`}
               >
-                {link.label}
+                {t(link.labelKey)}
               </Link>
             ))}
             
@@ -190,7 +215,7 @@ export default function Header() {
                   className="w-full flex items-center gap-2 px-4 py-2 text-sm font-medium text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
                 >
                   <LogOut className="w-4 h-4" />
-                  Sign out
+                  {language === 'hi' ? 'साइन आउट' : 'Sign out'}
                 </button>
               ) : (
                 <>
@@ -199,14 +224,14 @@ export default function Header() {
                     onClick={() => setIsMenuOpen(false)}
                     className="block px-4 py-2 rounded-lg text-sm font-medium text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-dark-card"
                   >
-                    Sign In
+                    {language === 'hi' ? 'साइन इन' : 'Sign In'}
                   </Link>
                   <Link
                     to="/register"
                     onClick={() => setIsMenuOpen(false)}
                     className="block px-4 py-2 rounded-lg text-sm font-medium text-primary-600 dark:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/20"
                   >
-                    Create Account
+                    {language === 'hi' ? 'अकाउंट बनाएं' : 'Create Account'}
                   </Link>
                 </>
               )}

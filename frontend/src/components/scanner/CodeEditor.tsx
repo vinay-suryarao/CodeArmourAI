@@ -4,6 +4,12 @@ import { useAppDispatch, useAppSelector } from '../../hooks/redux';
 import { setCode, setLanguage } from '../../store/slices/scannerSlice';
 import { SUPPORTED_LANGUAGES, SupportedLanguage } from '../../types';
 import { detectLanguage } from '../../utils/languageDetector';
+import { useLanguage } from '../../contexts/LanguageContext';
+import {
+  localizeDescription,
+  localizeSeverityLabel,
+  localizeVulnerabilityType,
+} from '../../utils/localization';
 
 // Monaco language mapping
 const MONACO_LANGUAGE_MAP: Record<SupportedLanguage, string> = {
@@ -21,6 +27,7 @@ const MONACO_LANGUAGE_MAP: Record<SupportedLanguage, string> = {
 
 export default function CodeEditor() {
   const dispatch = useAppDispatch();
+  const { language: uiLanguage, t } = useLanguage();
   const { code, language, currentResult } = useAppSelector(
     (state) => state.scanner
   );
@@ -69,7 +76,7 @@ export default function CodeEditor() {
         className: `vuln-${vuln.severity}`,
         glyphMarginClassName: `vuln-glyph-${vuln.severity}`,
         hoverMessage: {
-          value: `**${vuln.type}** (${vuln.severity.toUpperCase()})\n\n${vuln.description}\n\n*Confidence: ${(vuln.confidence * 100).toFixed(1)}%*`,
+              value: `**${localizeVulnerabilityType(vuln.type, uiLanguage)}** (${localizeSeverityLabel(vuln.severity.toUpperCase(), uiLanguage)})\n\n${localizeDescription(vuln.description, uiLanguage)}\n\n*Confidence: ${(vuln.confidence * 100).toFixed(1)}%*`,
         },
       },
     }));
@@ -80,7 +87,7 @@ export default function CodeEditor() {
       {/* Toolbar */}
       <div className="flex items-center justify-between px-4 py-2 bg-slate-100 dark:bg-dark-card border-b border-slate-200 dark:border-dark-border rounded-t-lg">
         <div className="flex items-center gap-3">
-          <label className="text-sm text-slate-600 dark:text-slate-400">Language:</label>
+          <label className="text-sm text-slate-600 dark:text-slate-400">{uiLanguage === 'hi' ? 'भाषा:' : 'Language:'}</label>
           <select
             value={language}
             onChange={(e) => handleLanguageChange(e.target.value as SupportedLanguage)}
@@ -95,7 +102,7 @@ export default function CodeEditor() {
         </div>
         
         <div className="text-xs text-slate-500 dark:text-slate-500">
-          {code.split('\n').length} lines
+          {t('line_count', { count: code.split('\n').length })}
         </div>
       </div>
 

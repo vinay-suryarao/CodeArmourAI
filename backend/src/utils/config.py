@@ -38,6 +38,15 @@ class Settings(BaseSettings):
     # Logging
     LOG_LEVEL: str = "INFO"
 
+    # Feedback Learning / MLOps
+    FEEDBACK_THRESHOLD: int = 100
+    AUTO_RETRAIN: bool = True
+    FEEDBACK_MIN_SAMPLES_PER_LABEL: int = 5
+    FEEDBACK_FALSE_POSITIVE_SUPPRESSION_RATE: float = 0.7
+    FEEDBACK_CORRECTION_MIN_CONFIDENCE: float = 0.6
+    FEEDBACK_POLICY_PATH: str = "./ml/data/processed/feedback_policy.json"
+    FEEDBACK_EVENTS_PATH: str = "./ml/data/processed/feedback_training_events.jsonl"
+
     @property
     def allowed_origins_list(self) -> List[str]:
         return [origin.strip() for origin in self.ALLOWED_ORIGINS.split(",")]

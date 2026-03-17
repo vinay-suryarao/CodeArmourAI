@@ -32,7 +32,7 @@ user = get_user(user_input)
 print(user)
 `,
   language: 'python',
-  filename: 'example.py',
+  filename: '',
   isScanning: false,
   currentResult: null,
   scanHistory: [],

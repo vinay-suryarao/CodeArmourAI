@@ -1,10 +1,14 @@
 """Firebase Auth middleware for verifying JWT tokens"""
 
+import base64
+import json
 import logging
 from typing import Optional
 
 from fastapi import Depends, HTTPException, Request, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
+
+from ...utils.config import settings
 
 logger = logging.getLogger(__name__)
 
@@ -24,6 +28,31 @@ except Exception as exc:
 security = HTTPBearer(auto_error=False)
 
 
+def _decode_unverified_payload(token: str) -> Optional[dict]:
+    """Decode JWT payload without signature verification (development fallback)."""
+    try:
+        parts = token.split(".")
+        if len(parts) != 3:
+            return None
+
+        payload = parts[1]
+        payload += "=" * (-len(payload) % 4)
+        decoded_bytes = base64.urlsafe_b64decode(payload)
+        payload_dict = json.loads(decoded_bytes.decode("utf-8"))
+
+        uid = payload_dict.get("user_id") or payload_dict.get("uid") or payload_dict.get("sub")
+        if not uid:
+            return None
+
+        return {
+            "uid": uid,
+            "email": payload_dict.get("email"),
+            "name": payload_dict.get("name"),
+        }
+    except Exception:
+        return None
+
+
 async def get_current_user(
     credentials: Optional[HTTPAuthorizationCredentials] = Depends(security),
 ) -> Optional[dict]:
@@ -35,13 +64,20 @@ async def get_current_user(
     if not credentials:
         return None
 
-    if not FIREBASE_AUTH_AVAILABLE or firebase_service is None:
-        raise HTTPException(
-            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-            detail="Authentication service unavailable",
-        )
-
     token = credentials.credentials
+
+    if not FIREBASE_AUTH_AVAILABLE or firebase_service is None:
+        if settings.DEBUG:
+            fallback_user = _decode_unverified_payload(token)
+            if fallback_user:
+                logger.warning(
+                    "Auth service unavailable, using development token payload fallback"
+                )
+                return fallback_user
+
+        # Optional-auth endpoints should keep working even if auth backend is down.
+        logger.warning("Auth service unavailable, continuing as anonymous user")
+        return None
 
     try:
         # Ensure Firebase is initialized
@@ -55,6 +91,15 @@ async def get_current_user(
             "name": decoded_token.get("name"),
         }
     except Exception as e:
+        if settings.DEBUG:
+            fallback_user = _decode_unverified_payload(token)
+            if fallback_user:
+                logger.warning(
+                    "Token verification failed, using development token payload fallback: %s",
+                    e,
+                )
+                return fallback_user
+
         if isinstance(e, firebase_auth.ExpiredIdTokenError):
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
@@ -65,6 +110,7 @@ async def get_current_user(
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 detail="Invalid token",
             )
+
         logger.error(f"Token verification failed: {e}")
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,

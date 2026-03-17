@@ -15,6 +15,13 @@ import { selectVulnerability } from '../../store/slices/scannerSlice';
 import { Vulnerability } from '../../types';
 import { apiService } from '../../services/api';
 import toast from 'react-hot-toast';
+import { useLanguage } from '../../contexts/LanguageContext';
+import {
+  localizeDescription,
+  localizeRecommendation,
+  localizeSeverityLabel,
+  localizeVulnerabilityType,
+} from '../../utils/localization';
 
 const severityConfig = {
   critical: {
@@ -53,6 +60,7 @@ function VulnerabilityCard({ vulnerability, scanId }: { vulnerability: Vulnerabi
   const [isExpanded, setIsExpanded] = useState(false);
   const [feedbackSent, setFeedbackSent] = useState(false);
   const dispatch = useAppDispatch();
+  const { language, t } = useLanguage();
   const config = severityConfig[vulnerability.severity];
   const Icon = config.icon;
 
@@ -64,9 +72,13 @@ function VulnerabilityCard({ vulnerability, scanId }: { vulnerability: Vulnerabi
         is_false_positive: isFalsePositive,
       });
       setFeedbackSent(true);
-      toast.success(isFalsePositive ? 'Marked as false positive' : 'Confirmed as vulnerability');
+      toast.success(
+        isFalsePositive
+          ? t('toast_marked_false_positive')
+          : t('toast_confirmed_vulnerability')
+      );
     } catch (error) {
-      toast.error('Failed to submit feedback');
+      toast.error(t('toast_feedback_failed'));
     }
   };
 
@@ -88,12 +100,12 @@ function VulnerabilityCard({ vulnerability, scanId }: { vulnerability: Vulnerabi
           <Icon className={`w-5 h-5 ${config.color}`} />
           <div>
             <h4 className="font-medium text-slate-900 dark:text-white">
-              {vulnerability.type}
+              {localizeVulnerabilityType(vulnerability.type, language)}
             </h4>
             <p className="text-sm text-slate-600 dark:text-slate-400 flex items-center gap-1">
-              <span className="font-semibold text-red-500">Line {vulnerability.location.start_line}</span>
+              <span className="font-semibold text-red-500">{t('results_line')} {vulnerability.location.start_line}</span>
               <span className="text-slate-400">•</span>
-              <span>{vulnerability.severity.toUpperCase()}</span>
+              <span>{localizeSeverityLabel(vulnerability.severity.toUpperCase(), language)}</span>
             </p>
           </div>
         </div>
@@ -111,13 +123,13 @@ function VulnerabilityCard({ vulnerability, scanId }: { vulnerability: Vulnerabi
         <div className="px-4 pb-4 space-y-4 border-t border-slate-200 dark:border-dark-border pt-4">
           {/* Description */}
           <div>
-            <h5 className="text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Description</h5>
-            <p className="text-sm text-slate-600 dark:text-slate-400">{vulnerability.description}</p>
+            <h5 className="text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">{t('results_description')}</h5>
+            <p className="text-sm text-slate-600 dark:text-slate-400">{localizeDescription(vulnerability.description, language)}</p>
           </div>
 
           {/* Code Snippet */}
           <div>
-            <h5 className="text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Code</h5>
+            <h5 className="text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">{t('results_code')}</h5>
             <pre className="p-3 bg-slate-800 rounded-lg text-sm text-slate-200 overflow-x-auto font-mono">
               {vulnerability.location.snippet}
             </pre>
@@ -125,8 +137,8 @@ function VulnerabilityCard({ vulnerability, scanId }: { vulnerability: Vulnerabi
 
           {/* Recommendation */}
           <div>
-            <h5 className="text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Recommendation</h5>
-            <p className="text-sm text-slate-600 dark:text-slate-400">{vulnerability.recommendation}</p>
+            <h5 className="text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">{t('results_recommendation')}</h5>
+            <p className="text-sm text-slate-600 dark:text-slate-400">{localizeRecommendation(vulnerability.recommendation, language)}</p>
           </div>
 
           {/* References */}
@@ -152,7 +164,7 @@ function VulnerabilityCard({ vulnerability, scanId }: { vulnerability: Vulnerabi
           {/* Feedback */}
           {!feedbackSent ? (
             <div className="flex items-center gap-2 pt-2 border-t border-slate-200 dark:border-dark-border">
-              <span className="text-sm text-slate-500 dark:text-slate-400">Is this accurate?</span>
+              <span className="text-sm text-slate-500 dark:text-slate-400">{t('results_is_accurate')}</span>
               <button
                 onClick={() => handleFeedback(false)}
                 className="p-2 rounded-lg hover:bg-green-100 dark:hover:bg-green-900/30 text-green-600 dark:text-green-400 transition-colors"
@@ -171,7 +183,7 @@ function VulnerabilityCard({ vulnerability, scanId }: { vulnerability: Vulnerabi
           ) : (
             <div className="flex items-center gap-2 text-sm text-green-600 dark:text-green-400 pt-2">
               <CheckCircle className="w-4 h-4" />
-              <span>Thank you for your feedback!</span>
+              <span>{t('results_feedback_thanks')}</span>
             </div>
           )}
         </div>
@@ -181,6 +193,7 @@ function VulnerabilityCard({ vulnerability, scanId }: { vulnerability: Vulnerabi
 }
 
 export default function ResultsPanel() {
+  const { language, t } = useLanguage();
   const { currentResult, isScanning } = useAppSelector((state) => state.scanner);
 
   if (isScanning) {
@@ -190,8 +203,8 @@ export default function ResultsPanel() {
           <div className="w-16 h-16 border-4 border-primary-200 dark:border-primary-900 rounded-full" />
           <div className="absolute top-0 left-0 w-16 h-16 border-4 border-primary-500 rounded-full border-t-transparent animate-spin" />
         </div>
-        <p className="mt-4 text-slate-600 dark:text-slate-400">Analyzing code for vulnerabilities...</p>
-        <p className="text-sm text-slate-500 dark:text-slate-500">This may take a moment</p>
+        <p className="mt-4 text-slate-600 dark:text-slate-400">{t('scanner_analyzing')}</p>
+        <p className="text-sm text-slate-500 dark:text-slate-500">{t('scanner_analyzing_subtitle')}</p>
       </div>
     );
   }
@@ -202,9 +215,9 @@ export default function ResultsPanel() {
         <div className="w-16 h-16 rounded-full bg-slate-100 dark:bg-dark-card flex items-center justify-center mb-4">
           <Info className="w-8 h-8 text-slate-400" />
         </div>
-        <h3 className="text-lg font-medium text-slate-700 dark:text-slate-300">No scan results</h3>
+        <h3 className="text-lg font-medium text-slate-700 dark:text-slate-300">{t('scanner_no_results')}</h3>
         <p className="text-sm text-slate-500 dark:text-slate-500 mt-1">
-          Click "Scan Code" to analyze your code
+          {t('scanner_no_results_desc')}
         </p>
       </div>
     );
@@ -217,7 +230,7 @@ export default function ResultsPanel() {
       {/* Summary */}
       <div className="p-4 bg-slate-100 dark:bg-dark-card border-b border-slate-200 dark:border-dark-border">
         <div className="flex items-center justify-between mb-3">
-          <h3 className="font-semibold text-slate-900 dark:text-white">Scan Results</h3>
+          <h3 className="font-semibold text-slate-900 dark:text-white">{t('scanner_results_title')}</h3>
           <span className="text-sm text-slate-500 dark:text-slate-400">
             {summary.scan_duration_ms.toFixed(0)}ms
           </span>
@@ -226,23 +239,23 @@ export default function ResultsPanel() {
         <div className="grid grid-cols-5 gap-2 text-center">
           <div className="p-2 rounded-lg bg-red-100 dark:bg-red-900/30">
             <div className="text-lg font-bold text-red-600 dark:text-red-400">{summary.critical_count}</div>
-            <div className="text-xs text-red-600/70 dark:text-red-400/70">Critical</div>
+            <div className="text-xs text-red-600/70 dark:text-red-400/70">{localizeSeverityLabel('CRITICAL', language)}</div>
           </div>
           <div className="p-2 rounded-lg bg-orange-100 dark:bg-orange-900/30">
             <div className="text-lg font-bold text-orange-600 dark:text-orange-400">{summary.high_count}</div>
-            <div className="text-xs text-orange-600/70 dark:text-orange-400/70">High</div>
+            <div className="text-xs text-orange-600/70 dark:text-orange-400/70">{localizeSeverityLabel('HIGH', language)}</div>
           </div>
           <div className="p-2 rounded-lg bg-amber-100 dark:bg-amber-900/30">
             <div className="text-lg font-bold text-amber-600 dark:text-amber-400">{summary.medium_count}</div>
-            <div className="text-xs text-amber-600/70 dark:text-amber-400/70">Medium</div>
+            <div className="text-xs text-amber-600/70 dark:text-amber-400/70">{localizeSeverityLabel('MEDIUM', language)}</div>
           </div>
           <div className="p-2 rounded-lg bg-yellow-100 dark:bg-yellow-900/30">
             <div className="text-lg font-bold text-yellow-600 dark:text-yellow-400">{summary.low_count}</div>
-            <div className="text-xs text-yellow-600/70 dark:text-yellow-400/70">Low</div>
+            <div className="text-xs text-yellow-600/70 dark:text-yellow-400/70">{localizeSeverityLabel('LOW', language)}</div>
           </div>
           <div className="p-2 rounded-lg bg-blue-100 dark:bg-blue-900/30">
             <div className="text-lg font-bold text-blue-600 dark:text-blue-400">{summary.info_count}</div>
-            <div className="text-xs text-blue-600/70 dark:text-blue-400/70">Info</div>
+            <div className="text-xs text-blue-600/70 dark:text-blue-400/70">{localizeSeverityLabel('INFO', language)}</div>
           </div>
         </div>
       </div>
@@ -252,9 +265,9 @@ export default function ResultsPanel() {
         {vulnerabilities.length === 0 ? (
           <div className="text-center py-8">
             <CheckCircle className="w-12 h-12 text-green-500 mx-auto mb-3" />
-            <h4 className="font-medium text-slate-700 dark:text-slate-300">No vulnerabilities found!</h4>
+            <h4 className="font-medium text-slate-700 dark:text-slate-300">{t('scanner_no_vulns')}</h4>
             <p className="text-sm text-slate-500 dark:text-slate-500 mt-1">
-              Your code appears to be secure
+              {t('scanner_no_vulns_desc')}
             </p>
           </div>
         ) : (

@@ -1,50 +1,82 @@
 import { Play, Upload, Trash2 } from 'lucide-react';
 import { useAppDispatch, useAppSelector } from '../hooks/redux';
-import { scanCode, clearResult, setCode, setLanguage } from '../store/slices/scannerSlice';
+import { scanCode, clearResult, setCode, setLanguage, setFilename } from '../store/slices/scannerSlice';
 import CodeEditor from '../components/scanner/CodeEditor';
 import ResultsPanel from '../components/scanner/ResultsPanel';
 import toast from 'react-hot-toast';
 import { validateLanguageMatch } from '../utils/languageDetector';
+import { useLanguage } from '../contexts/LanguageContext';
+
+const FILE_EXTENSIONS: Record<string, string> = {
+  python: 'py',
+  javascript: 'js',
+  java: 'java',
+  cpp: 'cpp',
+  c: 'c',
+  csharp: 'cs',
+  php: 'php',
+  go: 'go',
+  ruby: 'rb',
+  rust: 'rs',
+};
 
 export default function ScannerPage() {
   const dispatch = useAppDispatch();
+  const { t, language: selectedUiLanguage } = useLanguage();
   const { code, language, filename, isScanning, currentResult } = useAppSelector(
     (state) => state.scanner
   );
 
+  const getEffectiveFilename = () => {
+    if (filename && filename.trim()) {
+      return filename.trim();
+    }
+
+    const extension = FILE_EXTENSIONS[language] || 'txt';
+    return `untitled.${extension}`;
+  };
+
   const handleScan = () => {
     if (!code.trim()) {
-      toast.error('Please enter some code to scan');
+      toast.error(t('toast_enter_code'));
       return;
     }
 
     // Validate language match before scanning
     const validation = validateLanguageMatch(code, language);
     if (!validation.isValid) {
-      toast.error(validation.message || 'Language mismatch detected', {
+      toast.error(validation.message || t('lang_mismatch'), {
         duration: 5000,
         icon: '⚠️',
       });
       // Show suggestion to switch language
-      toast((t) => (
+      toast((toastItem) => (
         <div className="flex flex-col gap-2">
-          <span>Switch to {validation.detectedLanguage}?</span>
+          <span>
+            {selectedUiLanguage === 'hi'
+              ? t('toast_switch_to', { lang: validation.detectedLanguage })
+              : `Switch to ${validation.detectedLanguage}?`}
+          </span>
           <div className="flex gap-2">
             <button
               className="px-3 py-1 bg-primary-500 text-white rounded text-sm"
               onClick={() => {
                 dispatch(setLanguage(validation.detectedLanguage));
-                toast.dismiss(t.id);
-                toast.success(`Switched to ${validation.detectedLanguage}`);
+                toast.dismiss(toastItem.id);
+                toast.success(
+                  selectedUiLanguage === 'hi'
+                    ? t('toast_switched_to', { lang: validation.detectedLanguage })
+                    : `Switched to ${validation.detectedLanguage}`
+                );
               }}
             >
-              Yes, switch
+              {t('yes_switch')}
             </button>
             <button
               className="px-3 py-1 bg-slate-200 text-slate-700 rounded text-sm"
-              onClick={() => toast.dismiss(t.id)}
+              onClick={() => toast.dismiss(toastItem.id)}
             >
-              Keep current
+              {t('keep_current')}
             </button>
           </div>
         </div>
@@ -52,12 +84,13 @@ export default function ScannerPage() {
       return;
     }
 
-    dispatch(scanCode({ code, language, filename }));
+    dispatch(scanCode({ code, language, filename: getEffectiveFilename() }));
   };
 
   const handleClear = () => {
     dispatch(clearResult());
     dispatch(setCode(''));
+    dispatch(setFilename(''));
   };
 
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -68,10 +101,11 @@ export default function ScannerPage() {
     reader.onload = (e) => {
       const content = e.target?.result as string;
       dispatch(setCode(content));
+      dispatch(setFilename(file.name));
       toast.success(`Loaded ${file.name}`);
     };
     reader.onerror = () => {
-      toast.error('Failed to read file');
+      toast.error(t('toast_load_file_failed'));
     };
     reader.readAsText(file);
   };
@@ -82,10 +116,10 @@ export default function ScannerPage() {
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
         <div>
           <h1 className="text-2xl font-bold text-slate-900 dark:text-white">
-            Security Scanner
+            {t('scanner_title')}
           </h1>
           <p className="text-slate-600 dark:text-slate-400 text-sm mt-1">
-            Paste your code or upload a file to scan for vulnerabilities
+            {t('scanner_subtitle')}
           </p>
         </div>
 
@@ -93,7 +127,7 @@ export default function ScannerPage() {
           {/* File Upload */}
           <label className="inline-flex items-center gap-2 px-4 py-2 bg-slate-100 dark:bg-dark-card hover:bg-slate-200 dark:hover:bg-dark-border text-slate-700 dark:text-slate-300 font-medium rounded-lg transition-colors cursor-pointer">
             <Upload className="w-4 h-4" />
-            Upload
+            {t('scanner_upload')}
             <input
               type="file"
               accept=".py,.js,.ts,.java,.c,.cpp,.cs,.php,.go,.rb,.rs"
@@ -109,7 +143,7 @@ export default function ScannerPage() {
             className="inline-flex items-center gap-2 px-4 py-2 bg-slate-100 dark:bg-dark-card hover:bg-slate-200 dark:hover:bg-dark-border text-slate-700 dark:text-slate-300 font-medium rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <Trash2 className="w-4 h-4" />
-            Clear
+            {t('scanner_clear')}
           </button>
 
           {/* Scan Button */}
@@ -121,12 +155,12 @@ export default function ScannerPage() {
             {isScanning ? (
               <>
                 <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                Scanning...
+                {t('scanner_scanning')}
               </>
             ) : (
               <>
                 <Play className="w-4 h-4" />
-                Scan Code
+                {t('scanner_scan_code')}
               </>
             )}
           </button>

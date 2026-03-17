@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Shield, Mail, Lock, User, Eye, EyeOff, Sparkles } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
+import { useLanguage } from '../contexts/LanguageContext';
 import toast from 'react-hot-toast';
 
 export default function RegisterPage() {
@@ -13,39 +14,40 @@ export default function RegisterPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const { signup } = useAuth();
+  const { t } = useLanguage();
   const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (password !== confirmPassword) {
-      toast.error('Passwords do not match');
+      toast.error(t('toast_password_mismatch'));
       return;
     }
 
     if (password.length < 6) {
-      toast.error('Password must be at least 6 characters');
+      toast.error(t('toast_password_min'));
       return;
     }
 
     if (!displayName.trim()) {
-      toast.error('Please enter your name');
+      toast.error(t('toast_enter_name'));
       return;
     }
 
     setIsLoading(true);
     try {
       await signup(email, password, displayName.trim());
-      toast.success('Account created successfully!');
+      toast.success(t('toast_account_created'));
       navigate('/scanner');
     } catch (error: any) {
-      let message = 'Failed to create account';
+      let message = t('toast_create_account_failed');
       if (error.code === 'auth/email-already-in-use') {
-        message = 'Email is already registered';
+        message = t('toast_email_registered');
       } else if (error.code === 'auth/invalid-email') {
-        message = 'Invalid email address';
+        message = t('toast_invalid_email');
       } else if (error.code === 'auth/weak-password') {
-        message = 'Password is too weak';
+        message = t('toast_weak_password');
       }
       toast.error(message);
     } finally {
@@ -78,7 +80,7 @@ export default function RegisterPage() {
             </span>
           </Link>
           <p className="text-slate-500 dark:text-slate-400 text-sm mt-3">
-            Create your account to get started
+            {t('register_subtitle')}
           </p>
         </div>
 
@@ -88,7 +90,7 @@ export default function RegisterPage() {
             {/* Name */}
             <div>
               <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">
-                Full Name
+                {t('register_full_name')}
               </label>
               <div className="relative">
                 <User className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
@@ -106,7 +108,7 @@ export default function RegisterPage() {
             {/* Email */}
             <div>
               <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">
-                Email
+                {t('login_email')}
               </label>
               <div className="relative">
                 <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
@@ -124,7 +126,7 @@ export default function RegisterPage() {
             {/* Password */}
             <div>
               <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">
-                Password
+                {t('register_password')}
               </label>
               <div className="relative">
                 <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
@@ -133,7 +135,7 @@ export default function RegisterPage() {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   className="w-full pl-11 pr-12 py-3 rounded-xl bg-slate-50 dark:bg-dark-bg border border-slate-200 dark:border-dark-border text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-primary-500/50 focus:border-primary-500 transition-all"
-                  placeholder="Min 6 characters"
+                  placeholder={t('register_min_chars')}
                   required
                   minLength={6}
                 />
@@ -150,7 +152,7 @@ export default function RegisterPage() {
             {/* Confirm Password */}
             <div>
               <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">
-                Confirm Password
+                {t('register_confirm_password')}
               </label>
               <div className="relative">
                 <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
@@ -159,7 +161,7 @@ export default function RegisterPage() {
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
                   className="w-full pl-11 pr-4 py-3 rounded-xl bg-slate-50 dark:bg-dark-bg border border-slate-200 dark:border-dark-border text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-primary-500/50 focus:border-primary-500 transition-all"
-                  placeholder="Re-enter password"
+                  placeholder={t('register_reenter_password')}
                   required
                   minLength={6}
                 />
@@ -175,12 +177,12 @@ export default function RegisterPage() {
               {isLoading ? (
                 <>
                   <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                  Creating Account...
+                  {t('register_creating')}
                 </>
               ) : (
                 <>
                   <Sparkles className="w-5 h-5" />
-                  Create Account
+                  {t('register_create')}
                 </>
               )}
             </button>
@@ -189,12 +191,12 @@ export default function RegisterPage() {
 
         {/* Login Link */}
         <p className="text-center text-sm text-slate-500 dark:text-slate-400 mt-6">
-          Already have an account?{' '}
+          {t('register_have_account')}{' '}
           <Link
             to="/login"
             className="text-primary-500 hover:text-primary-600 font-medium transition-colors"
           >
-            Sign in
+            {t('register_signin')}
           </Link>
         </p>
       </motion.div>

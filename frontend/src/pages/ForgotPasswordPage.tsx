@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Shield, Mail, ArrowLeft, Send, CheckCircle } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
+import { useLanguage } from '../contexts/LanguageContext';
 import toast from 'react-hot-toast';
 
 export default function ForgotPasswordPage() {
@@ -10,6 +11,7 @@ export default function ForgotPasswordPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [emailSent, setEmailSent] = useState(false);
   const { resetPassword } = useAuth();
+  const { t } = useLanguage();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -17,15 +19,15 @@ export default function ForgotPasswordPage() {
     try {
       await resetPassword(email);
       setEmailSent(true);
-      toast.success('Password reset email sent!');
+      toast.success(t('toast_reset_sent'));
     } catch (error: any) {
-      let message = 'Failed to send reset email';
+      let message = t('toast_reset_failed');
       if (error.code === 'auth/user-not-found') {
-        message = 'No account found with this email';
+        message = t('toast_no_account_email');
       } else if (error.code === 'auth/invalid-email') {
-        message = 'Invalid email address';
+        message = t('toast_invalid_email');
       } else if (error.code === 'auth/too-many-requests') {
-        message = 'Too many attempts. Try again later';
+        message = t('toast_too_many_attempts');
       }
       toast.error(message);
     } finally {
@@ -58,7 +60,7 @@ export default function ForgotPasswordPage() {
             </span>
           </Link>
           <p className="text-slate-500 dark:text-slate-400 text-sm mt-3">
-            Reset your password
+            {t('forgot_subtitle')}
           </p>
         </div>
 
@@ -74,33 +76,32 @@ export default function ForgotPasswordPage() {
                 <CheckCircle className="w-8 h-8 text-green-500" />
               </div>
               <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-2">
-                Email Sent!
+                {t('forgot_sent_title')}
               </h3>
               <p className="text-sm text-slate-500 dark:text-slate-400 mb-6">
-                We've sent a password reset link to <br />
+                {t('forgot_sent_line1')} <br />
                 <span className="font-medium text-slate-700 dark:text-slate-300">{email}</span>
               </p>
               <p className="text-xs text-slate-400 dark:text-slate-500 mb-4">
-                Check your email and click the link to reset your password. 
-                The link will expire in 1 hour.
+                {t('forgot_sent_line2')}
               </p>
               <button
                 onClick={() => { setEmailSent(false); setEmail(''); }}
                 className="text-sm text-primary-500 hover:text-primary-600 font-medium transition-colors"
               >
-                Try a different email
+                {t('forgot_try_other')}
               </button>
             </motion.div>
           ) : (
             <form onSubmit={handleSubmit} className="space-y-5">
               <p className="text-sm text-slate-600 dark:text-slate-400">
-                Enter your email address and we'll send you a link to reset your password.
+                {t('forgot_instruction')}
               </p>
               
               {/* Email */}
               <div>
                 <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">
-                  Email
+                  {t('login_email')}
                 </label>
                 <div className="relative">
                   <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
@@ -124,12 +125,12 @@ export default function ForgotPasswordPage() {
                 {isLoading ? (
                   <>
                     <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                    Sending...
+                    {t('forgot_sending')}
                   </>
                 ) : (
                   <>
                     <Send className="w-5 h-5" />
-                    Send Reset Link
+                    {t('forgot_send_link')}
                   </>
                 )}
               </button>
@@ -144,7 +145,7 @@ export default function ForgotPasswordPage() {
             className="inline-flex items-center gap-1 text-sm text-slate-500 dark:text-slate-400 hover:text-primary-500 transition-colors"
           >
             <ArrowLeft className="w-4 h-4" />
-            Back to Sign In
+            {t('forgot_back_login')}
           </Link>
         </div>
       </motion.div>

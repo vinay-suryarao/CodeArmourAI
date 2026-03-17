@@ -129,6 +129,7 @@ class FirebaseService:
         is_false_positive: bool,
         user_comment: Optional[str] = None,
         correct_label: Optional[str] = None,
+        predicted_label: Optional[str] = None,
     ) -> bool:
         if not self.is_connected:
             if not self.initialize():
@@ -138,11 +139,13 @@ class FirebaseService:
             doc_ref = self._db.collection("feedback").document(feedback_id)
             doc_ref.set(
                 {
+                    "id": feedback_id,
                     "scan_id": scan_id,
                     "vulnerability_id": vulnerability_id,
                     "is_false_positive": is_false_positive,
                     "user_comment": user_comment,
                     "correct_label": correct_label,
+                    "predicted_label": predicted_label,
                     "created_at": datetime.utcnow().isoformat(),
                     "processed": False,
                 }
@@ -153,6 +156,73 @@ class FirebaseService:
             logger.error(f"Failed to store feedback: {e}")
             return False
 
+    async def get_unprocessed_feedback(self, limit: int = 1000) -> List[Dict]:
+        if not self.is_connected:
+            if not self.initialize():
+                return []
+
+        try:
+            docs = (
+                self._db.collection("feedback")
+                .where("processed", "==", False)
+                .limit(limit)
+                .stream()
+            )
+            feedback_items = []
+            for doc in docs:
+                item = doc.to_dict() or {}
+                item["id"] = item.get("id") or doc.id
+                feedback_items.append(item)
+            return feedback_items
+        except Exception as e:
+            logger.error(f"Failed to fetch unprocessed feedback: {e}")
+            return []
+
+    async def mark_feedback_processed(self, feedback_ids: List[str]) -> int:
+        if not feedback_ids:
+            return 0
+
+        if not self.is_connected:
+            if not self.initialize():
+                return 0
+
+        try:
+            processed = 0
+            for feedback_id in feedback_ids:
+                self._db.collection("feedback").document(feedback_id).update(
+                    {
+                        "processed": True,
+                        "processed_at": datetime.utcnow().isoformat(),
+                    }
+                )
+                processed += 1
+            return processed
+        except Exception as e:
+            logger.error(f"Failed to mark feedback as processed: {e}")
+            return 0
+
+    async def get_scan_vulnerability_label(
+        self, scan_id: str, vulnerability_id: str
+    ) -> Optional[str]:
+        if not self.is_connected:
+            if not self.initialize():
+                return None
+
+        try:
+            doc = self._db.collection("scans").document(scan_id).get()
+            if not doc.exists:
+                return None
+
+            scan = doc.to_dict() or {}
+            vulnerabilities = scan.get("vulnerabilities", [])
+            for vulnerability in vulnerabilities:
+                if vulnerability.get("id") == vulnerability_id:
+                    return vulnerability.get("type")
+            return None
+        except Exception as e:
+            logger.error(f"Failed to resolve vulnerability label from scan: {e}")
+            return None
+
     async def get_statistics(self) -> Dict:
         if not self.is_connected:
             return {"connected": False}
@@ -160,7 +230,20 @@ class FirebaseService:
         try:
             scans = len(list(self._db.collection("scans").limit(1000).stream()))
             feedback = len(list(self._db.collection("feedback").limit(1000).stream()))
-            return {"connected": True, "total_scans": scans, "total_feedback": feedback}
+            unprocessed_feedback = len(
+                list(
+                    self._db.collection("feedback")
+                    .where("processed", "==", False)
+                    .limit(1000)
+                    .stream()
+                )
+            )
+            return {
+                "connected": True,
+                "total_scans": scans,
+                "total_feedback": feedback,
+                "unprocessed_feedback": unprocessed_feedback,
+            }
         except Exception as e:
             return {"connected": False, "error": str(e)}
 

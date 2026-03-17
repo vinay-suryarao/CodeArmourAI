@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Shield, Mail, Lock, Eye, EyeOff, LogIn } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
+import { useLanguage } from '../contexts/LanguageContext';
 import toast from 'react-hot-toast';
 
 export default function LoginPage() {
@@ -11,6 +12,7 @@ export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const { login } = useAuth();
+  const { t } = useLanguage();
   const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -18,20 +20,20 @@ export default function LoginPage() {
     setIsLoading(true);
     try {
       await login(email, password);
-      toast.success('Welcome back!');
+      toast.success(t('toast_login_welcome'));
       navigate('/scanner');
     } catch (error: any) {
-      let message = 'Failed to sign in';
+      let message = t('toast_login_failed');
       if (error.code === 'auth/user-not-found') {
-        message = 'No account found with this email';
+        message = t('toast_no_account_email');
       } else if (error.code === 'auth/wrong-password') {
-        message = 'Incorrect password';
+        message = t('toast_incorrect_password');
       } else if (error.code === 'auth/invalid-email') {
-        message = 'Invalid email address';
+        message = t('toast_invalid_email');
       } else if (error.code === 'auth/too-many-requests') {
-        message = 'Too many attempts. Try again later';
+        message = t('toast_too_many_attempts');
       } else if (error.code === 'auth/invalid-credential') {
-        message = 'Invalid email or password';
+        message = t('toast_invalid_credentials');
       } else if (error.code === 'auth/invalid-api-key') {
         message = 'Firebase API key invalid hai. frontend/.env me real Firebase config set karo';
       } else if (typeof error?.message === 'string' && error.message.includes('Firebase is not configured')) {
@@ -68,7 +70,7 @@ export default function LoginPage() {
             </span>
           </Link>
           <p className="text-slate-500 dark:text-slate-400 text-sm mt-3">
-            Sign in to your account
+            {t('login_subtitle')}
           </p>
         </div>
 
@@ -78,7 +80,7 @@ export default function LoginPage() {
             {/* Email */}
             <div>
               <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">
-                Email
+                {t('login_email')}
               </label>
               <div className="relative">
                 <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
@@ -97,13 +99,13 @@ export default function LoginPage() {
             <div>
               <div className="flex items-center justify-between mb-1.5">
                 <label className="block text-sm font-medium text-slate-700 dark:text-slate-300">
-                  Password
+                  {t('login_password')}
                 </label>
                 <Link
                   to="/forgot-password"
                   className="text-xs text-primary-500 hover:text-primary-600 font-medium transition-colors"
                 >
-                  Forgot password?
+                  {t('login_forgot')}
                 </Link>
               </div>
               <div className="relative">
@@ -113,7 +115,7 @@ export default function LoginPage() {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   className="w-full pl-11 pr-12 py-3 rounded-xl bg-slate-50 dark:bg-dark-bg border border-slate-200 dark:border-dark-border text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-primary-500/50 focus:border-primary-500 transition-all"
-                  placeholder="Enter your password"
+                  placeholder={t('login_enter_password')}
                   required
                 />
                 <button
@@ -135,12 +137,12 @@ export default function LoginPage() {
               {isLoading ? (
                 <>
                   <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                  Signing in...
+                  {t('login_signing')}
                 </>
               ) : (
                 <>
                   <LogIn className="w-5 h-5" />
-                  Sign In
+                  {t('login_signin')}
                 </>
               )}
             </button>
@@ -149,12 +151,12 @@ export default function LoginPage() {
 
         {/* Register Link */}
         <p className="text-center text-sm text-slate-500 dark:text-slate-400 mt-6">
-          Don't have an account?{' '}
+          {t('login_no_account')}{' '}
           <Link
             to="/register"
             className="text-primary-500 hover:text-primary-600 font-medium transition-colors"
           >
-            Create one
+            {t('login_create_one')}
           </Link>
         </p>
       </motion.div>

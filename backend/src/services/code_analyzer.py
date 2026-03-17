@@ -13,6 +13,7 @@ from ..schemas.response import (CodeAnalysisResponse, ScanSummary,
                                 SeverityEnum, VulnerabilityDetail,
                                 VulnerabilityLocation, VulnerabilityType)
 from .model_service import model_service
+from .feedback_learning_service import feedback_learning_service
 
 logger = logging.getLogger(__name__)
 
@@ -38,6 +39,8 @@ LABEL_TO_VULN_TYPE = {
     "xxe": VulnerabilityType.XXE,
     "ssrf": VulnerabilityType.SSRF,
 }
+
+VULN_TYPE_TO_LABEL = {value: key for key, value in LABEL_TO_VULN_TYPE.items()}
 
 CWE_MAPPING = {
     "sql_injection": "CWE-89",
@@ -94,6 +97,7 @@ RECOMMENDATIONS = {
 
 class CodeAnalyzerService:
     def __init__(self):
+        self._scan_cache: Dict[str, Dict[str, Any]] = {}
         self._ensure_model_loaded()
 
     def _ensure_model_loaded(self):
@@ -129,6 +133,9 @@ class CodeAnalyzerService:
                 vulnerabilities=vulnerabilities,
             )
 
+            # Keep a lightweight local cache so feedback can resolve predicted labels.
+            self._scan_cache[scan_id] = response.model_dump()
+
             # Store in Firebase if available
             if store_result and FIREBASE_AVAILABLE and firebase_service:
                 try:
@@ -158,6 +165,19 @@ class CodeAnalyzerService:
                 continue
 
             vuln_type = pred.vulnerability_type
+            adjustment = feedback_learning_service.get_adjustment(vuln_type)
+
+            if adjustment.get("suppressed"):
+                continue
+
+            corrected_label = adjustment.get("corrected_label")
+            if corrected_label:
+                vuln_type = corrected_label
+
+            adjusted_confidence = min(
+                1.0,
+                max(0.0, pred.confidence * float(adjustment.get("confidence_multiplier", 1.0))),
+            )
 
             # Use exact line number from prediction, not from chunk
             start_line = pred.chunk_start_line
@@ -179,7 +199,7 @@ class CodeAnalyzerService:
             vuln_type_enum = LABEL_TO_VULN_TYPE.get(vuln_type, VulnerabilityType.OTHER)
             severity = SEVERITY_MAPPING.get(vuln_type, SeverityEnum.MEDIUM)
 
-            if pred.confidence < 0.7:
+            if adjusted_confidence < 0.7:
                 severity_order = [
                     SeverityEnum.INFO,
                     SeverityEnum.LOW,
@@ -196,9 +216,9 @@ class CodeAnalyzerService:
                     id=f"vuln_{uuid.uuid4().hex[:8]}",
                     type=vuln_type_enum,
                     severity=severity,
-                    confidence=pred.confidence,
+                    confidence=adjusted_confidence,
                     location=location,
-                    description=f"Potential {vuln_type_enum.value} vulnerability detected with {pred.confidence:.1%} confidence.",
+                    description=f"Potential {vuln_type_enum.value} vulnerability detected with {adjusted_confidence:.1%} confidence.",
                     recommendation=RECOMMENDATIONS.get(
                         vuln_type, "Review and fix the identified security issue."
                     ),
@@ -208,6 +228,23 @@ class CodeAnalyzerService:
             )
 
         return vulnerabilities
+
+    def get_predicted_label(self, scan_id: str, vulnerability_id: str) -> Optional[str]:
+        scan = self._scan_cache.get(scan_id)
+        if not scan:
+            return None
+
+        vulnerabilities = scan.get("vulnerabilities", [])
+        for vulnerability in vulnerabilities:
+            if vulnerability.get("id") == vulnerability_id:
+                vuln_type_name = vulnerability.get("type")
+                try:
+                    vuln_type_enum = VulnerabilityType(vuln_type_name)
+                    return VULN_TYPE_TO_LABEL.get(vuln_type_enum)
+                except Exception:
+                    return None
+
+        return None
 
     def _build_summary(
         self, vulnerabilities: List[VulnerabilityDetail], code: str, duration_ms: float
