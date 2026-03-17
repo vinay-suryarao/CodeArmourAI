@@ -87,7 +87,7 @@ export default function Header() {
 
           {/* Actions */}
           <div className="flex items-center gap-2">
-            <div className="hidden sm:flex items-center gap-1 px-3 py-1 rounded-full bg-gradient-to-r from-primary-500/10 to-purple-500/10 border border-primary-500/20">
+            <div className="hidden sm:flex items-center gap-1 px-3 py-1 rounded-full bg-gradient-to-r from-primary-500/10 to-primary-700/20 border border-primary-500/20">
               <Sparkles className="w-3 h-3 text-primary-500" />
               <span className="text-xs font-medium text-primary-600 dark:text-primary-400">AI Powered</span>
             </div>
@@ -130,7 +130,7 @@ export default function Header() {
                   onClick={() => setShowUserMenu(!showUserMenu)}
                   className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-primary-500/10 hover:bg-primary-500/20 transition-colors"
                 >
-                  <div className="w-7 h-7 rounded-full bg-gradient-to-br from-primary-500 to-purple-500 flex items-center justify-center text-white text-xs font-bold">
+                  <div className="w-7 h-7 rounded-full bg-gradient-to-br from-primary-500 to-primary-700 flex items-center justify-center text-white text-xs font-bold">
                     {currentUser.displayName?.charAt(0).toUpperCase() || currentUser.email?.charAt(0).toUpperCase()}
                   </div>
                   <span className="hidden sm:block text-sm font-medium text-slate-700 dark:text-slate-300 max-w-[100px] truncate">

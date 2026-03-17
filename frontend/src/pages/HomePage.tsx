@@ -54,12 +54,12 @@ export default function HomePage() {
       {/* Hero Section */}
       <section className="relative py-20 lg:py-32">
         {/* Animated gradient background */}
-        <div className="absolute inset-0 bg-gradient-to-br from-primary-500/10 via-purple-500/5 to-transparent dark:from-primary-500/20 dark:via-purple-500/10" />
+        <div className="absolute inset-0 bg-gradient-to-br from-primary-500/12 via-primary-900/10 to-transparent dark:from-primary-600/20 dark:via-primary-950/20" />
         <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGRlZnM+PHBhdHRlcm4gaWQ9ImdyaWQiIHdpZHRoPSI2MCIgaGVpZ2h0PSI2MCIgcGF0dGVyblVuaXRzPSJ1c2VyU3BhY2VPblVzZSI+PHBhdGggZD0iTSA2MCAwIEwgMCAwIDAgNjAiIGZpbGw9Im5vbmUiIHN0cm9rZT0icmdiYSgxNCwxNjUsMjMzLDAuMDUpIiBzdHJva2Utd2lkdGg9IjEiLz48L3BhdHRlcm4+PC9kZWZzPjxyZWN0IHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbGw9InVybCgjZ3JpZCkiLz48L3N2Zz4=')] opacity-50" />
         
         {/* Floating orbs for visual effect */}
         <div className="absolute top-20 left-10 w-72 h-72 bg-primary-500/20 rounded-full blur-3xl animate-pulse" />
-        <div className="absolute bottom-20 right-10 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }} />
+        <div className="absolute bottom-20 right-10 w-96 h-96 bg-primary-900/20 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }} />
         
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
           <motion.div
@@ -72,7 +72,7 @@ export default function HomePage() {
               initial={{ scale: 0.9 }}
               animate={{ scale: 1 }}
               transition={{ duration: 0.5 }}
-              className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-primary-500/10 to-purple-500/10 border border-primary-500/20 text-primary-600 dark:text-primary-400 text-sm font-medium mb-6 backdrop-blur-sm"
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-primary-500/10 to-primary-700/20 border border-primary-500/20 text-primary-600 dark:text-primary-400 text-sm font-medium mb-6 backdrop-blur-sm"
             >
               <Sparkles className="w-4 h-4" />
               {t('home_badge')}
@@ -80,7 +80,7 @@ export default function HomePage() {
             
             <h1 className="text-4xl sm:text-5xl lg:text-7xl font-bold text-slate-900 dark:text-white mb-6">
               {t('home_title_prefix')}
-              <span className="bg-gradient-to-r from-primary-500 to-purple-500 bg-clip-text text-transparent block mt-2">CodeArmour AI</span>
+              <span className="bg-gradient-to-r from-primary-500 to-primary-700 bg-clip-text text-transparent block mt-2">CodeArmour AI</span>
             </h1>
             
             <p className="text-lg sm:text-xl text-slate-600 dark:text-slate-400 max-w-2xl mx-auto mb-8">
@@ -187,11 +187,11 @@ export default function HomePage() {
       </section>
 
       {/* CTA Section */}
-      <section className="py-20 bg-gradient-to-r from-primary-500 via-primary-600 to-purple-600 relative overflow-hidden">
+      <section className="py-20 bg-gradient-to-r from-primary-700 via-primary-600 to-primary-900 relative overflow-hidden">
         {/* Decorative elements */}
         <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGRlZnM+PHBhdHRlcm4gaWQ9ImdyaWQiIHdpZHRoPSI2MCIgaGVpZ2h0PSI2MCIgcGF0dGVyblVuaXRzPSJ1c2VyU3BhY2VPblVzZSI+PHBhdGggZD0iTSA2MCAwIEwgMCAwIDAgNjAiIGZpbGw9Im5vbmUiIHN0cm9rZT0icmdiYSgyNTUsMjU1LDI1NSwwLjEpIiBzdHJva2Utd2lkdGg9IjEiLz48L3BhdHRlcm4+PC9kZWZzPjxyZWN0IHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbGw9InVybCgjZ3JpZCkiLz48L3N2Zz4=')] opacity-30" />
         <div className="absolute top-0 left-1/4 w-64 h-64 bg-white/10 rounded-full blur-3xl" />
-        <div className="absolute bottom-0 right-1/4 w-48 h-48 bg-purple-300/20 rounded-full blur-2xl" />
+        <div className="absolute bottom-0 right-1/4 w-48 h-48 bg-primary-300/20 rounded-full blur-2xl" />
         
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative">
           <motion.div

@@ -49,7 +49,7 @@ export default function LoginPage() {
     <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-dark-bg relative overflow-hidden">
       {/* Background effects */}
       <div className="absolute top-20 right-10 w-72 h-72 bg-primary-500/10 rounded-full blur-3xl" />
-      <div className="absolute bottom-20 left-10 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl" />
+      <div className="absolute bottom-20 left-10 w-96 h-96 bg-primary-900/20 rounded-full blur-3xl" />
       
       <motion.div
         initial={{ opacity: 0, y: 20 }}

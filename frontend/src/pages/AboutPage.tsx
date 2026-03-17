@@ -181,9 +181,9 @@ export default function AboutPage() {
         initial={{ opacity: 0 }}
         whileInView={{ opacity: 1 }}
         viewport={{ once: true }}
-        className="text-center bg-gradient-to-br from-primary-500/10 via-purple-500/5 to-transparent dark:from-primary-900/30 dark:via-purple-900/20 dark:to-transparent rounded-2xl p-8 border border-primary-200 dark:border-primary-800"
+        className="text-center bg-gradient-to-br from-primary-500/10 via-primary-900/10 to-transparent dark:from-primary-900/30 dark:via-primary-950/25 dark:to-transparent rounded-2xl p-8 border border-primary-200 dark:border-primary-800"
       >
-        <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-primary-500 to-purple-500 mb-6 shadow-lg shadow-primary-500/25">
+        <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-primary-500 to-primary-700 mb-6 shadow-lg shadow-primary-500/25">
           <Lock className="w-8 h-8 text-white" />
         </div>
         <h2 className="text-2xl font-bold text-slate-900 dark:text-white mb-4">

@@ -10,17 +10,17 @@ export default {
       colors: {
         // Brand colors
         primary: {
-          50: '#f0f9ff',
-          100: '#e0f2fe',
-          200: '#bae6fd',
-          300: '#7dd3fc',
-          400: '#38bdf8',
-          500: '#0ea5e9',
-          600: '#0284c7',
-          700: '#0369a1',
-          800: '#075985',
-          900: '#0c4a6e',
-          950: '#082f49',
+          50: '#fff1f2',
+          100: '#ffe4e6',
+          200: '#fecdd3',
+          300: '#fda4af',
+          400: '#fb7185',
+          500: '#ef4444',
+          600: '#dc2626',
+          700: '#b91c1c',
+          800: '#991b1b',
+          900: '#7f1d1d',
+          950: '#450a0a',
         },
         // Severity colors
         severity: {
@@ -32,15 +32,15 @@ export default {
         },
         // Dark mode specific
         dark: {
-          bg: '#0f172a',
-          card: '#1e293b',
-          border: '#334155',
-          text: '#e2e8f0',
-          muted: '#94a3b8',
+          bg: '#09090b',
+          card: '#111113',
+          border: '#27272a',
+          text: '#e4e4e7',
+          muted: '#a1a1aa',
         },
       },
       fontFamily: {
-        sans: ['Inter', 'system-ui', 'sans-serif'],
+        sans: ['Space Grotesk', 'system-ui', 'sans-serif'],
         mono: ['JetBrains Mono', 'Fira Code', 'monospace'],
       },
       animation: {
